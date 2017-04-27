@@ -1,0 +1,7 @@
+<div>
+	<div>&{a}</div>
+	<div>&{(func1)b}</div>
+	<div>&{c?"pepito"}</div>
+	<div>&{d?"jorgito":"juanito"}</div>
+	<div>&{(func1,func2)e}</div>
+</div>
