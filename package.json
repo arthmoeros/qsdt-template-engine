@@ -1,0 +1,25 @@
+{
+  "name": "artifact-builder-template-processor",
+  "version": "0.0.1",
+  "description": "ArtifactBuilder's template processor utility",
+  "main": "index.js",
+  "scripts": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/arthmoeros/artifact-builder-template-processor.git"
+  },
+  "keywords": [
+    "artifact-builder",
+    "template",
+    "processor",
+    "processing"
+  ],
+  "author": "arthmoeros",
+  "license": "GPL-3.0",
+  "bugs": {
+    "url": "https://github.com/arthmoeros/artifact-builder-template-processor/issues"
+  },
+  "homepage": "https://github.com/arthmoeros/artifact-builder-template-processor#readme"
+}
