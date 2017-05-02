@@ -1,8 +1,8 @@
 {
-  "name": "artifact-builder-template-processor",
+  "name": "abuilder-template-processor",
   "version": "0.0.1",
   "description": "ArtifactBuilder's template processor utility",
-  "main": "index.js",
+  "main": "index.ts",
   "scripts": {
     "test": "test"
   },
@@ -24,6 +24,8 @@
   "homepage": "https://github.com/arthmoeros/artifact-builder-template-processor#readme",
   "dependencies": {
     "@types/node": "^7.0.14",
+    "hashcode": "^1.0.3",
+    "ip": "^1.1.5",
     "replaceall": "^0.1.6"
   }
 }
