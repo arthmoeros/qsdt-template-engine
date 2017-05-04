@@ -3,7 +3,7 @@ import { StringHandlerUtil } from "@artifacter/common";
 /**
  * @class MappedExpression
  * @see npm @artifacter/template-processor
- * @see also README.md of this project for an explanation about abtmpl files
+ * @see also README.md of this project for an explanation about atmpl files
  * @author arthmoeros (Arturo Saavedra) artu.saavedra@gmail.com
  * 
  * This Class defines a mapped expression, which are recognized within Artifacter's template
@@ -74,7 +74,7 @@ export class MappedExpression {
 	private isIterated: boolean;
 
 	/**
-	 * Provides debugging information for abtmpl files development
+	 * Provides debugging information for atmpl files development
 	 */
 	private invalidExprMsg: {
 		expr: string,

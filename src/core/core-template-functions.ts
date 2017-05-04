@@ -5,7 +5,7 @@ import { Osb11gGuidGenerator } from "./osb11g/osb11g-guid-generator";
 /**
  * @class CoreTemplateFunctions
  * @see npm @artifacter/template-processor
- * @see also README.md of this project for an explanation about abtmpl files
+ * @see also README.md of this project for an explanation about atmpl files
  * @author arthmoeros (Arturo Saavedra) artu.saavedra@gmail.com
  * 
  * This Class defines core template functions to use with templates, these should be

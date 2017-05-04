@@ -1,27 +1,28 @@
 {
-  "name": "@artifacter/template-processor",
+  "name": "@artifacter/template-engine",
   "version": "0.9.0",
-  "description": "Artifacter's template processor utility",
+  "description": "Artifacter's template processing engine",
   "main": "index.ts",
   "scripts": {
     "test": "ts-node -P .\\src .\\src\\run-test.ts"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/arthmoeros/artifact-builder-template-processor.git"
+    "url": "git+https://github.com/arthmoeros/artifacter-template-engine.git"
   },
   "keywords": [
-    "artifact-builder",
+    "artifact builder",
+    "artifacter",
     "template",
-    "processor",
+    "engine",
     "processing"
   ],
   "author": "arthmoeros",
   "license": "GPL-3.0",
   "bugs": {
-    "url": "https://github.com/arthmoeros/artifact-builder-template-processor/issues"
+    "url": "https://github.com/arthmoeros/artifacter-template-engine/issues"
   },
-  "homepage": "https://github.com/arthmoeros/artifact-builder-template-processor#readme",
+  "homepage": "https://github.com/arthmoeros/artifacter-template-engine#readme",
   "dependencies": {
     "@artifacter/common": "^0.9.0",
     "@types/node": "^7.0.14",

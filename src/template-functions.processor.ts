@@ -5,7 +5,7 @@ import { CoreTemplateFunctions } from "./core/core-template-functions";
 /**
  * @class TemplateFunctionsProcessor
  * @see npm @artifacter/template-processor
- * @see also README.md of this project for an explanation about abtmpl files and custom def functions
+ * @see also README.md of this project for an explanation about atmpl files and custom def functions
  * @author arthmoeros (Arturo Saavedra) artu.saavedra@gmail.com
  * 
  * This class is used to invoke Template Functions, for use with Declared Iterations

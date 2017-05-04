@@ -10,7 +10,7 @@ const subTmplReged = new RegExp(/(::)*([a-zA-Z0-9_./]*?)*(::)/g);
 /**
  * @class TemplateProcessor
  * @see npm @artifacter/template-processor
- * @see also README.md of this project for an explanation about abtmpl files
+ * @see also README.md of this project for an explanation about atmpl files
  * @author arthmoeros (Arturo Saavedra) artu.saavedra@gmail.com
  * 
  * This is the main class for template processing, it uses a Map<string, string> to process the template
@@ -22,7 +22,7 @@ export class TemplateProcessor {
 	/**
 	 * Associated TemplateContainer
 	 */
-	private abtmplContainer: TemplateContainer;
+	private atmplContainer: TemplateContainer;
 
 	/**
 	 * PipeFunctions processor
@@ -41,20 +41,20 @@ export class TemplateProcessor {
 	constructor(stringTmpl: string);
 
 	/**
-	 * Construct a Templater Processor with an abtmpl file
-	 * @param fileName abtmpl file name
-	 * @param fileBuffer abtmpl Buffer with abtmpl contents
+	 * Construct a Templater Processor with an atmpl file
+	 * @param fileName atmpl file name
+	 * @param fileBuffer atmpl Buffer with atmpl contents
 	 */
 	constructor(fileName: string, fileBuffer: Buffer, customPipeFunctions?: any, customTmplFunctions?: any);
 
 	constructor(param1: string, param2?: Buffer, customPipeFunctions?: any, customTmplFunctions?: any) {
-		this.abtmplContainer = new TemplateContainer(param1, param2);
+		this.atmplContainer = new TemplateContainer(param1, param2);
 		this.pipeFunctionsProcessor = new PipeFunctionsProcessor(customPipeFunctions);
 		this.tmplFunctionsProcessor = new TemplateFunctionsProcessor(customTmplFunctions);
 	}
 
 	/**
-	 * Runs the processor, checks if abtmpl is invalid or if the map is empty.
+	 * Runs the processor, checks if atmpl is invalid or if the map is empty.
 	 * This process puts the map's values into the mapped expressions following their defined 
 	 * instructions.
 	 * It will emit a warning if a map value from a non-optional mapped expression's mappedKey 
@@ -63,21 +63,21 @@ export class TemplateProcessor {
 	 * @param map map containing the data to put into mapped expressions
 	 */
 	public run(map: Map<string, string>): string {
-		if (this.abtmplContainer.$invalid) {
+		if (this.atmplContainer.$invalid) {
 			throw new Error(TemplateContainer.msgTmplInvalid);
 		}
 		if (map.size == 0) {
 			throw new Error("Invalid Values Map: map is empty");
 		}
-		let workingResult: StringContainer = new StringContainer(this.abtmplContainer.$fileContents);
-		for (var index = (this.abtmplContainer.$mapExprList.length - 1); index > -1; index--) {
-			var mapExpr = this.abtmplContainer.$mapExprList[index];
+		let workingResult: StringContainer = new StringContainer(this.atmplContainer.$fileContents);
+		for (var index = (this.atmplContainer.$mapExprList.length - 1); index > -1; index--) {
+			var mapExpr = this.atmplContainer.$mapExprList[index];
 			if (mapExpr.$isIterated) {
 				workingResult.replaceRange(mapExpr.$startIndex, mapExpr.$endIndex, this.retrieveValueFromIterDec(mapExpr.$mappedKey));;
 			} else {
 				let mappedValue: string = map.get(mapExpr.$mappedKey);
 				if (mappedValue == undefined && !mapExpr.$isOptional) {
-					console.warn("Expected key '" + mapExpr.$mappedKey + "', but provided map doesn't have a value associated with it, expect an invalid generated artifact from template located in '" + this.abtmplContainer.$filename + "' or maybe you should set the Mapped Expression as optional");
+					console.warn("Expected key '" + mapExpr.$mappedKey + "', but provided map doesn't have a value associated with it, expect an invalid generated artifact from template located in '" + this.atmplContainer.$filename + "' or maybe you should set the Mapped Expression as optional");
 				} else if (mappedValue == undefined && mapExpr.$isOptional) {
 					workingResult.replaceRange(mapExpr.$startIndex, mapExpr.$endIndex, "");
 				} else {
@@ -103,7 +103,7 @@ export class TemplateProcessor {
 	 */
 	private retrieveValueFromIterDec(mappedKey: string): string {
 		let result: string;
-		this.abtmplContainer.$iterDecList.forEach(iterDec => {
+		this.atmplContainer.$iterDecList.forEach(iterDec => {
 			if (iterDec.$mappedKey == mappedKey) {
 				result = this.tmplFunctionsProcessor.invoke(iterDec.$mappedFunction);
 				return;

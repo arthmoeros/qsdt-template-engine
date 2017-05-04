@@ -7,14 +7,14 @@ import { MappedExpression } from "./../entity/mapped-expression";
 /**
  * @class TemplateContainer
  * @see npm @artifacter/template-processor
- * @see also README.md of this project for an explanation about abtmpl files
+ * @see also README.md of this project for an explanation about atmpl files
  * @author arthmoeros (Arturo Saavedra) artu.saavedra@gmail.com
  * 
- * This Class defines an abtmpl file container, which are recognized within Artifacter's template
+ * This Class defines an atmpl file container, which are recognized within Artifacter's template
  * engine, its definition is used by the template processor, it contains everything associated with a
- * abtmpl processed file, its found mapped expressions, declared iterations, the file's name and contents.
+ * atmpl processed file, its found mapped expressions, declared iterations, the file's name and contents.
  * 
- * Also works with "anonymous" templates, which are abtmpl not necessarily bound to a real file,
+ * Also works with "anonymous" templates, which are atmpl not necessarily bound to a real file,
  * like a string used to write a real file name.
  * 
  * It does additional syntax checking and consistency validations.
@@ -26,12 +26,12 @@ export class TemplateContainer{
 	public static readonly msgIterInvalid: string = "Invalid iterated mapped expressions!: Found iterated mapped expression(s), but couldn't find an Declared Iteration";
 
 	/**
-	 * Associated abtmpl file name, null if it is an anonymous template
+	 * Associated atmpl file name, null if it is an anonymous template
 	 */
 	private filename: string;
 
 	/**
-	 * Associated abtmpl file contents or a plain template string for an anonymous template
+	 * Associated atmpl file contents or a plain template string for an anonymous template
 	 */
 	private fileContents: string;
 
@@ -72,9 +72,9 @@ export class TemplateContainer{
 	constructor(stringTmpl: string);
 
 	/**
-	 * Constructs a TemplateContainer for an abtmpl template file
-	 * @param fileName abtmpl file name
-	 * @param fileBuffer abtmpl buffer containing the file contents
+	 * Constructs a TemplateContainer for an atmpl template file
+	 * @param fileName atmpl file name
+	 * @param fileBuffer atmpl buffer containing the file contents
 	 */
 	constructor(fileName: string, fileBuffer: Buffer);
 	

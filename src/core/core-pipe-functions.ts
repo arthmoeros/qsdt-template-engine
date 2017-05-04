@@ -3,7 +3,7 @@ import { StringHandlerUtil, PipeFunction } from "@artifacter/common";
 /**
  * @class CorePipeFunctions
  * @see npm @artifacter/template-processor
- * @see also README.md of this project for an explanation about abtmpl files
+ * @see also README.md of this project for an explanation about atmpl files
  * @author arthmoeros (Arturo Saavedra) artu.saavedra@gmail.com
  * 
  * This Class defines core pipe functions to use with templates, these should be

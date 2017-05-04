@@ -5,7 +5,7 @@ import { CorePipeFunctions } from "./core/core-pipe-functions";
 /**
  * @class PipeFunctionsProcessor
  * @see npm @artifacter/template-processor
- * @see also README.md of this project for an explanation about abtmpl files and custom pipe functions
+ * @see also README.md of this project for an explanation about atmpl files and custom pipe functions
  * @author arthmoeros (Arturo Saavedra) artu.saavedra@gmail.com
  * 
  * This class is used to invoke Pipe Functions, for use with normal Mapped Expressions

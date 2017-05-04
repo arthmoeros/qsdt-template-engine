@@ -1,7 +1,7 @@
 /**
  * @class DeclaredIteration
  * @see npm @artifacter/template-processor
- * @see also README.md of this project for an explanation about abtmpl files
+ * @see also README.md of this project for an explanation about atmpl files
  * @author arthmoeros (Arturo Saavedra) artu.saavedra@gmail.com
  * 
  * This Class defines a declared iteration, which are recognized within Artifacter's template
