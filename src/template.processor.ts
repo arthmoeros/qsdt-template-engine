@@ -41,9 +41,11 @@ export class TemplateProcessor {
 	constructor(stringTmpl: string);
 
 	/**
-	 * Construct a Templater Processor with an atmpl file
+	 * Construct a Templater Processor with an atmpl file and optional custom pipe functions and custom template functions
 	 * @param fileName atmpl file name
 	 * @param fileBuffer atmpl Buffer with atmpl contents
+	 * @param customPipeFunctions Custom Pipe Functions to use, it must contain methods annotated with @PipeFunction
+	 * @param customTmplFunctions Custom Template Functions to use, it must contain methods annotated with @TemplateFunction
 	 */
 	constructor(fileName: string, fileBuffer: Buffer, customPipeFunctions?: any, customTmplFunctions?: any);
 
