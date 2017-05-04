@@ -1,4 +1,5 @@
 #iteration(actionId=generateOsb11gGUID)
+#iteration(lolo=doOther)
 <?xml version="1.0" encoding="UTF-8"?>
 <xml-fragment xmlns:ser="http://www.bea.com/wli/sb/services" xmlns:tran="http://www.bea.com/wli/sb/transports" xmlns:env="http://www.bea.com/wli/config/env" xmlns:http="http://www.bea.com/wli/sb/transports/http" xmlns:con="http://www.bea.com/wli/sb/pipeline/config" xmlns:con1="http://www.bea.com/wli/sb/stages/transform/config" xmlns:con2="http://www.bea.com/wli/sb/stages/config">
   <ser:coreEntry isProxy="true" isEnabled="true">
@@ -22,7 +23,7 @@
     <tran:provider-id>http</tran:provider-id>
     <tran:inbound>true</tran:inbound>
     <tran:URI>
-      <env:value>/OSB_&{(aup)bizDomain}_&{(aup)bizEntity}/&{(sixPaddLeftZero)serviceId}_&{serviceName}&{*(prefixUnderscore)serviceType}_&{(aup)serviceVersion}</env:value>
+      <env:value>/OSB_&{(auc)bizDomain}_&{(auc)bizEntity}/&{(sixPaddLeftZero)serviceId}_&{serviceName}&{*(prefixUnderscore)serviceType}_&{(auc)serviceVersion}</env:value>
     </tran:URI>
     <tran:inbound-properties/>
     <tran:all-headers>false</tran:all-headers>
@@ -46,10 +47,10 @@
             <con1:expr>
               <con2:xqueryText>"test2"</con2:xqueryText>
             </con1:expr>
-          </con1:assign>
+          </con1:assign>&{#lolo}
         </con:actions>
       </con:stage>
-    </con:pipeline>
+    </con:pipeline>&{#lolo}
     <con:pipeline type="response" name="&{(sixPaddLeftZero)serviceId}_&{serviceName}_response"/>
     <con:flow>
       <con:pipeline-node name="&{(sixPaddLeftZero)serviceId}_&{serviceName}">
@@ -58,4 +59,5 @@
       </con:pipeline-node>
     </con:flow>
   </ser:router>
+  &{(doSomething)bizDomain}
 </xml-fragment>

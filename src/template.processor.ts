@@ -26,6 +26,16 @@ export class TemplateProcessor {
 	private abtmplContainer: TemplateContainer;
 
 	/**
+	 * PipeFunctions processor
+	 */
+	private pipeFunctionsProcessor: PipeFunctionsProcessor;
+
+	/**
+	 * DefinitionFunctions processor
+	 */
+	private defFunctionsProcessor: DefFunctionsProcessor;
+
+	/**
 	 * Constructs a Template Processor with an anonymous template
 	 * @param stringTmpl string containing template contents
 	 */
@@ -36,10 +46,12 @@ export class TemplateProcessor {
 	 * @param fileName abtmpl file name
 	 * @param fileBuffer abtmpl Buffer with abtmpl contents
 	 */
-	constructor(fileName: string, fileBuffer: Buffer);
+	constructor(fileName: string, fileBuffer: Buffer, customPipeFunctions?: any, customDefFunctions?: any);
 
-	constructor(param1: string, param2?: Buffer) {
+	constructor(param1: string, param2?: Buffer, customPipeFunctions?: any, customDefFunctions?: any) {
 		this.abtmplContainer = new TemplateContainer(param1, param2);
+		this.pipeFunctionsProcessor = new PipeFunctionsProcessor(customPipeFunctions);
+		this.defFunctionsProcessor = new DefFunctionsProcessor(customDefFunctions);
 	}
 
 	/**
@@ -74,7 +86,7 @@ export class TemplateProcessor {
 						mappedValue = mappedValue != "" ? mapExpr.$ternaryTrue : mapExpr.$ternaryFalse ? mapExpr.$ternaryFalse : "";
 					}
 					if (mapExpr.$pipeFunctions && mapExpr.$pipeFunctions.length > 0) {
-						mappedValue = PipeFunctionsProcessor.invoke(mapExpr.$pipeFunctions, mappedValue);
+						mappedValue = this.pipeFunctionsProcessor.invoke(mapExpr.$pipeFunctions, mappedValue);
 					}
 					workingResult.replaceRange(mapExpr.$startIndex, mapExpr.$endIndex, mappedValue);
 				}
@@ -94,7 +106,7 @@ export class TemplateProcessor {
 		let result: string;
 		this.abtmplContainer.$iterDefList.forEach(iterDef => {
 			if (iterDef.$mappedKey == mappedKey) {
-				result = DefFunctionsProcessor.invoke(iterDef.$mappedFunction);
+				result = this.defFunctionsProcessor.invoke(iterDef.$mappedFunction);
 				return;
 			}
 		});
