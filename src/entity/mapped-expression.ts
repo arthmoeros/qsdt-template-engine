@@ -2,12 +2,11 @@ import { StringHandlerUtil } from "@ab/common";
 
 /**
  * @class MappedExpression
- * @version 0.9.0
  * @see npm @ab/template-processor
  * @see also README.md of this project for an explanation about abtmpl files
  * @author arthmoeros (Arturo Saavedra) artu.saavedra@gmail.com
  * 
- * This Class defines a mapped expression, which are recognized within Artifact Builder's template
+ * This Class defines a mapped expression, which are recognized within Artifacter's template
  * engine, it defines the regex for location of normal and iterated mapped expressions and provides
  * a structured interface for the values and configuration that a mapped expression represents
  * 

@@ -1,19 +1,18 @@
 import { StringContainer, StringHandlerUtil } from "@ab/common";
 import * as fs from "fs";
 
-import { IterationDefinition } from "./../entity/iteration-definition";
+import { DeclaredIteration } from "./../entity/declared-iteration";
 import { MappedExpression } from "./../entity/mapped-expression";
 
 /**
  * @class TemplateContainer
- * @version 0.9.0
  * @see npm @ab/template-processor
  * @see also README.md of this project for an explanation about abtmpl files
  * @author arthmoeros (Arturo Saavedra) artu.saavedra@gmail.com
  * 
- * This Class defines an abtmpl file container, which are recognized within Artifact Builder's template
+ * This Class defines an abtmpl file container, which are recognized within Artifacter's template
  * engine, its definition is used by the template processor, it contains everything associated with a
- * abtmpl processed file, its found mapped expressions, iteration definitions, the file's name and contents.
+ * abtmpl processed file, its found mapped expressions, declared iterations, the file's name and contents.
  * 
  * Also works with "anonymous" templates, which are abtmpl not necessarily bound to a real file,
  * like a string used to write a real file name.
@@ -24,7 +23,7 @@ import { MappedExpression } from "./../entity/mapped-expression";
 export class TemplateContainer{
 
 	public static readonly msgTmplInvalid: string = "Invalid template?: Couldn't find any matching expression in the template, maybe isn't a valid template or expressions have syntax errors";
-	public static readonly msgIterInvalid: string = "Invalid iterated mapped expressions!: Found iterated mapped expression(s), but couldn't find an Iteration Definition";
+	public static readonly msgIterInvalid: string = "Invalid iterated mapped expressions!: Found iterated mapped expression(s), but couldn't find an Declared Iteration";
 
 	/**
 	 * Associated abtmpl file name, null if it is an anonymous template
@@ -52,9 +51,9 @@ export class TemplateContainer{
 	private iterMapExprList: MappedExpression[] = new Array<MappedExpression>();
 
 	/**
-	 * Lists Iteration Definitions found in the template
+	 * Lists Declared Iterations found in the template
 	 */
-	private iterDefList: IterationDefinition[] = new Array<IterationDefinition>();
+	private iterDecList: DeclaredIteration[] = new Array<DeclaredIteration>();
 
 	/**
 	 * Flags the template as invalid
@@ -91,7 +90,7 @@ export class TemplateContainer{
 
 		this.initializeExpressions();
 		this.checkInvalidExpressions();
-		this.checkIterationDef();
+		this.checkIterationDec();
 		this.joinMappedExpressions();
 	}
 
@@ -149,25 +148,25 @@ export class TemplateContainer{
 	}
 
 	/**
-	 * Checks for Iteration Definitions presence in the template only if it found iterated mapped expressions.
-	 * Also checks if all iterated mapped expressions found have a corresponding Iteration Definition
+	 * Checks for Declared Iterations presence in the template only if it found iterated mapped expressions.
+	 * Also checks if all iterated mapped expressions found have a corresponding Declared Iteration
 	 */
-	private checkIterationDef() {
+	private checkIterationDec() {
 		if(this.iterMapExprList.length == 0){
 			return;
 		}
-		const iterDefRegex = new RegExp(IterationDefinition.regex);
+		const iterDecRegex = new RegExp(DeclaredIteration.regex);
 		
 		while(true){
-			let result: RegExpExecArray = iterDefRegex.exec(this.fileContents);
-			if(iterDefRegex.lastIndex == 0){
+			let result: RegExpExecArray = iterDecRegex.exec(this.fileContents);
+			if(iterDecRegex.lastIndex == 0){
 				break;
 			}
-			let def: IterationDefinition = new IterationDefinition(result);
-			this.iterDefList.push(def);
+			let def: DeclaredIteration = new DeclaredIteration(result);
+			this.iterDecList.push(def);
 		}
 
-		if(this.iterDefList.length == 0 && this.iterMapExprList.length > 0){
+		if(this.iterDecList.length == 0 && this.iterMapExprList.length > 0){
 			this.invalid = true;
 			throw new Error(TemplateContainer.msgIterInvalid);
 		}
@@ -175,15 +174,15 @@ export class TemplateContainer{
 		this.iterMapExprList.forEach(iterMapExpr => {
 			let iterMapExprKey : string = iterMapExpr.$mappedKey;
 			let defMissing: boolean = true;
-			this.iterDefList.forEach(iterDef => {
-				if(iterDef.$mappedKey == iterMapExpr.$mappedKey){
+			this.iterDecList.forEach(iterDec => {
+				if(iterDec.$mappedKey == iterMapExpr.$mappedKey){
 					defMissing = false;
 					return;
 				}
 			});
 			if(defMissing){
 				this.invalid = true;
-				throw new Error("Iterated mapped expression references '"+iterMapExpr.$mappedKey+"', but couldn't find a matching Iteration Definition");
+				throw new Error("Iterated mapped expression references '"+iterMapExpr.$mappedKey+"', but couldn't find a matching Declared Iteration");
 			}
 		});
 	}
@@ -208,8 +207,8 @@ export class TemplateContainer{
 		return this.mapExprList;
 	}
 
-	public get $iterDefList(): IterationDefinition[] {
-		return this.iterDefList;
+	public get $iterDecList(): DeclaredIteration[] {
+		return this.iterDecList;
 	}
 
 	public get $invalid(): boolean  {

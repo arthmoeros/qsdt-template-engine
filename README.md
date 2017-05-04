@@ -1,2 +1,2 @@
-# ArtifactBuilder
+# Artifacter
 WIP

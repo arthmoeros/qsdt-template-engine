@@ -4,7 +4,6 @@ import { CorePipeFunctions } from "./core/core-pipe-functions";
 
 /**
  * @class PipeFunctionsProcessor
- * @version 0.9.0
  * @see npm @ab/template-processor
  * @see also README.md of this project for an explanation about abtmpl files and custom pipe functions
  * @author arthmoeros (Arturo Saavedra) artu.saavedra@gmail.com

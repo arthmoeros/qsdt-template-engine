@@ -1,15 +1,14 @@
 import { StringContainer } from "@ab/common";
 
 import { MappedExpression } from "./entity/mapped-expression";
-import { IterationDefinition } from "./entity/iteration-definition";
+import { DeclaredIteration } from "./entity/declared-iteration";
 import { TemplateContainer } from "./container/template.container";
 import { PipeFunctionsProcessor } from "./pipe-functions.processor";
-import { DefFunctionsProcessor } from "./def-functions.processor";
+import { TemplateFunctionsProcessor } from "./template-functions.processor";
 
 const subTmplReged = new RegExp(/(::)*([a-zA-Z0-9_./]*?)*(::)/g);
 /**
  * @class TemplateProcessor
- * @version 0.9.0
  * @see npm @ab/template-processor
  * @see also README.md of this project for an explanation about abtmpl files
  * @author arthmoeros (Arturo Saavedra) artu.saavedra@gmail.com
@@ -31,9 +30,9 @@ export class TemplateProcessor {
 	private pipeFunctionsProcessor: PipeFunctionsProcessor;
 
 	/**
-	 * DefinitionFunctions processor
+	 * TemplateFunctionsProcessor processor
 	 */
-	private defFunctionsProcessor: DefFunctionsProcessor;
+	private tmplFunctionsProcessor: TemplateFunctionsProcessor;
 
 	/**
 	 * Constructs a Template Processor with an anonymous template
@@ -46,12 +45,12 @@ export class TemplateProcessor {
 	 * @param fileName abtmpl file name
 	 * @param fileBuffer abtmpl Buffer with abtmpl contents
 	 */
-	constructor(fileName: string, fileBuffer: Buffer, customPipeFunctions?: any, customDefFunctions?: any);
+	constructor(fileName: string, fileBuffer: Buffer, customPipeFunctions?: any, customTmplFunctions?: any);
 
-	constructor(param1: string, param2?: Buffer, customPipeFunctions?: any, customDefFunctions?: any) {
+	constructor(param1: string, param2?: Buffer, customPipeFunctions?: any, customTmplFunctions?: any) {
 		this.abtmplContainer = new TemplateContainer(param1, param2);
 		this.pipeFunctionsProcessor = new PipeFunctionsProcessor(customPipeFunctions);
-		this.defFunctionsProcessor = new DefFunctionsProcessor(customDefFunctions);
+		this.tmplFunctionsProcessor = new TemplateFunctionsProcessor(customTmplFunctions);
 	}
 
 	/**
@@ -74,7 +73,7 @@ export class TemplateProcessor {
 		for (var index = (this.abtmplContainer.$mapExprList.length - 1); index > -1; index--) {
 			var mapExpr = this.abtmplContainer.$mapExprList[index];
 			if (mapExpr.$isIterated) {
-				workingResult.replaceRange(mapExpr.$startIndex, mapExpr.$endIndex, this.retrieveValueFromIterDef(mapExpr.$mappedKey));;
+				workingResult.replaceRange(mapExpr.$startIndex, mapExpr.$endIndex, this.retrieveValueFromIterDec(mapExpr.$mappedKey));;
 			} else {
 				let mappedValue: string = map.get(mapExpr.$mappedKey);
 				if (mappedValue == undefined && !mapExpr.$isOptional) {
@@ -92,21 +91,21 @@ export class TemplateProcessor {
 				}
 			}
 		}
-		let iterDefRegex: RegExp = new RegExp(IterationDefinition.regex);
-		workingResult.replace(iterDefRegex, "");
+		let iterDecRegex: RegExp = new RegExp(DeclaredIteration.regex);
+		workingResult.replace(iterDecRegex, "");
 
 		return workingResult.toString();
 	}
 
 	/**
 	 * Invokes the associated mapped function with the iterated mapped expression
-	 * @param mappedKey iterated mapped expression's mappedKey to process with Iteration Definition
+	 * @param mappedKey iterated mapped expression's mappedKey to process with Declared Iteration
 	 */
-	private retrieveValueFromIterDef(mappedKey: string): string {
+	private retrieveValueFromIterDec(mappedKey: string): string {
 		let result: string;
-		this.abtmplContainer.$iterDefList.forEach(iterDef => {
-			if (iterDef.$mappedKey == mappedKey) {
-				result = this.defFunctionsProcessor.invoke(iterDef.$mappedFunction);
+		this.abtmplContainer.$iterDecList.forEach(iterDec => {
+			if (iterDec.$mappedKey == mappedKey) {
+				result = this.tmplFunctionsProcessor.invoke(iterDec.$mappedFunction);
 				return;
 			}
 		});

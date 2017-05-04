@@ -1,10 +1,10 @@
+import { NumberHandlerUtil } from "@ab/common";
+
 import * as ip from "ip";
 import * as hashcode from "hashcode";
-//private static readonly hashcode = require("hashcode").hashCode;
 
 /**
  * @class Osb11gGuidGenerator
- * @version 0.9.0
  * @see npm @ab/template-processor
  * @author arthmoeros (Arturo Saavedra) artu.saavedra@gmail.com
  * 
@@ -19,7 +19,7 @@ export class Osb11gGuidGenerator {
     private static readonly shortMIN_VAL: number = -32768;
     private static readonly shortMAX_VAL: number = 32767;
 
-    private hostUnique = Osb11gGuidGenerator.randomIntInc(0, 2147483647)
+    private hostUnique = NumberHandlerUtil.randomIntInc(0, 2147483647)
     private time = (new Date).getTime();
 
     private lastCount = Osb11gGuidGenerator.shortMIN_VAL;
@@ -32,7 +32,7 @@ export class Osb11gGuidGenerator {
         }
         if (this.iastr == null) {
             var hash = hashcode.hashCode().value(ip.address());
-            var rndLong = Osb11gGuidGenerator.randomIntInc(-9223372036854775808, 9223372036854775807) + hash;
+            var rndLong = NumberHandlerUtil.randomIntInc(-9223372036854775808, 9223372036854775807) + hash;
             if (rndLong < 0) {
                 rndLong = rndLong * -1;
             }
@@ -40,15 +40,5 @@ export class Osb11gGuidGenerator {
         }
         var count = this.lastCount++;
         return this.iastr + "-" + this.hostUnique.toString(16) + "." + this.time.toString(16) + "." + count.toString(16);;
-    }
-
-    /**
-     * Generates a pseudorandom between low and high values inclusive
-     * TODO: This should be on a utility class on @ab/common
-     * @param low 
-     * @param high 
-     */
-    private static randomIntInc(low, high) {
-        return Math.floor(Math.random() * (high - low + 1) + low);
     }
 }

@@ -1,4 +1,4 @@
-import { PipeFunction, DefinitionFunction } from "@ab/common";
+import { PipeFunction, TemplateFunction } from "@ab/common";
 import { TemplateProcessor } from "./template.processor";
 import * as fs from "fs";
 
@@ -9,7 +9,7 @@ class PepitoFunctions{
         return str.concat("ASDF!!!");
     }
 
-    @DefinitionFunction()
+    @TemplateFunction()
     public doOther(): string{
         return "LALALA";
     }

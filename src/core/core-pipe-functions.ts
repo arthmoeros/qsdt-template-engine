@@ -2,7 +2,6 @@ import { StringHandlerUtil, PipeFunction } from "@ab/common";
 
 /**
  * @class CorePipeFunctions
- * @version 0.9.0
  * @see npm @ab/template-processor
  * @see also README.md of this project for an explanation about abtmpl files
  * @author arthmoeros (Arturo Saavedra) artu.saavedra@gmail.com
