@@ -1,6 +1,6 @@
 /**
  * @class DeclaredIteration
- * @see npm @ab/template-processor
+ * @see npm @artifacter/template-processor
  * @see also README.md of this project for an explanation about abtmpl files
  * @author arthmoeros (Arturo Saavedra) artu.saavedra@gmail.com
  * 

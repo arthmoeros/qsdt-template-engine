@@ -1,11 +1,11 @@
-import { NumberHandlerUtil } from "@ab/common";
+import { NumberHandlerUtil } from "@artifacter/common";
 
 import * as ip from "ip";
 import * as hashcode from "hashcode";
 
 /**
  * @class Osb11gGuidGenerator
- * @see npm @ab/template-processor
+ * @see npm @artifacter/template-processor
  * @author arthmoeros (Arturo Saavedra) artu.saavedra@gmail.com
  * 
  * This Class is a Port of the com.bea.wli.sb.util.Guid#generateGuid method from

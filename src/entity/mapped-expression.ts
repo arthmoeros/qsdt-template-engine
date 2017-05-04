@@ -1,8 +1,8 @@
-import { StringHandlerUtil } from "@ab/common";
+import { StringHandlerUtil } from "@artifacter/common";
 
 /**
  * @class MappedExpression
- * @see npm @ab/template-processor
+ * @see npm @artifacter/template-processor
  * @see also README.md of this project for an explanation about abtmpl files
  * @author arthmoeros (Arturo Saavedra) artu.saavedra@gmail.com
  * 

@@ -1,4 +1,4 @@
-import { PipeFunction, TemplateFunction } from "@ab/common";
+import { PipeFunction, TemplateFunction } from "@artifacter/common";
 import { TemplateProcessor } from "./template.processor";
 import * as fs from "fs";
 

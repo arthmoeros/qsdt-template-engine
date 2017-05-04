@@ -1,10 +1,10 @@
-import { Annotation } from "@ab/common";
+import { Annotation } from "@artifacter/common";
 
 import { CoreTemplateFunctions } from "./core/core-template-functions";
 
 /**
  * @class TemplateFunctionsProcessor
- * @see npm @ab/template-processor
+ * @see npm @artifacter/template-processor
  * @see also README.md of this project for an explanation about abtmpl files and custom def functions
  * @author arthmoeros (Arturo Saavedra) artu.saavedra@gmail.com
  * 

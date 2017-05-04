@@ -1,10 +1,10 @@
-import { Annotation } from "@ab/common";
+import { Annotation } from "@artifacter/common";
 
 import { CorePipeFunctions } from "./core/core-pipe-functions";
 
 /**
  * @class PipeFunctionsProcessor
- * @see npm @ab/template-processor
+ * @see npm @artifacter/template-processor
  * @see also README.md of this project for an explanation about abtmpl files and custom pipe functions
  * @author arthmoeros (Arturo Saavedra) artu.saavedra@gmail.com
  * 

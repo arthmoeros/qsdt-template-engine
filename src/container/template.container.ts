@@ -1,4 +1,4 @@
-import { StringContainer, StringHandlerUtil } from "@ab/common";
+import { StringContainer, StringHandlerUtil } from "@artifacter/common";
 import * as fs from "fs";
 
 import { DeclaredIteration } from "./../entity/declared-iteration";
@@ -6,7 +6,7 @@ import { MappedExpression } from "./../entity/mapped-expression";
 
 /**
  * @class TemplateContainer
- * @see npm @ab/template-processor
+ * @see npm @artifacter/template-processor
  * @see also README.md of this project for an explanation about abtmpl files
  * @author arthmoeros (Arturo Saavedra) artu.saavedra@gmail.com
  * 

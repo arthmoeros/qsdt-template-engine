@@ -1,4 +1,4 @@
-import { StringContainer } from "@ab/common";
+import { StringContainer } from "@artifacter/common";
 
 import { MappedExpression } from "./entity/mapped-expression";
 import { DeclaredIteration } from "./entity/declared-iteration";
@@ -9,7 +9,7 @@ import { TemplateFunctionsProcessor } from "./template-functions.processor";
 const subTmplReged = new RegExp(/(::)*([a-zA-Z0-9_./]*?)*(::)/g);
 /**
  * @class TemplateProcessor
- * @see npm @ab/template-processor
+ * @see npm @artifacter/template-processor
  * @see also README.md of this project for an explanation about abtmpl files
  * @author arthmoeros (Arturo Saavedra) artu.saavedra@gmail.com
  * 
