@@ -16,7 +16,7 @@ In the case of processing a file, the processor can also be provided with Custom
 The atmpl format is Artifacter template syntax, for simplicity sake let's say we have a html file that we want prerendered with specific data, being part of a build-time file or a deliverable artifact, we should use this file as a basis for our template. This template, onwards the "atmpl" file, can have any text within it, the engine will only look for certain declarations and expressions to fill them with additional data in its processing, using a map provided to the processor.
 
 ##### Mapped Expression
-This expression defines how a value contained in a map under certain key will replace it content, a Mapped Expression is broken down as follows:
+This expression defines how a value contained in a map under certain key will replace its content, a Mapped Expression is broken down as follows:
 
 ![alt mapped-expression-syntax-img](https://raw.githubusercontent.com/arthmoeros/artifacter-ui/master/doc-img/mapped_expression_syntax.gif)
 
@@ -53,7 +53,7 @@ The engine does check that each custom function fulfills the contract by reading
 This operator changes the expression replacement behavior, if the mapped key results in a value, it will be checked by the engine if it is a empty string or not, depending on this the expression will be replaced by the first resulting value defined or the second. The first value is required in the expression only if a ternary operator is declared, the second isn't required. If a second value is not declared and the found value is empty, the replacement will be done with an empty string.
 
 ##### Declared Iteration & Iterated Expression
-Iteration in the atmpl syntax can be used to put iterated values on each template, for this to work, an Iteration must be declared indicating its iteration key for reference and a template function to execute for each finding of a iterated expression, which contains only the iteration key reference. In this case there is no pre-processing of the value like the mapped expression. Iterated expressions must have a corresponding Declared Iteration written in the template, if a "orphan" Iterated Expression is found, the engine will raise an error, in the other hand Declared Iterations can be on their own. Now, let's talk about syntax:
+Iteration in the atmpl syntax can be used to put iterated values on each template, for this to work, an Iteration must be declared on a single line indicating its iteration key for reference and a template function to execute for each finding of an iterated expression, which contains only the iteration key reference. In this case there is no pre-processing of the value like a mapped expression. Iterated expressions must have a corresponding Declared Iteration written in the template, if a "orphan" Iterated Expression is found, the engine will raise an error, in the other hand Declared Iterations can be on their own, as they are harmless and are deleted anyway on the final stage of the template processing. Now, let's talk about syntax:
 
 ![alt iteration-syntax-img](https://raw.githubusercontent.com/arthmoeros/artifacter-ui/master/doc-img/iteration_syntax.gif)
 
@@ -65,9 +65,9 @@ Declared Iteration Begin|Indicates that a declared iteration is here
 Iteration Key|Identifies the declaration and its execution for iterated expression reference
 Template Function|Template function to run for each iterated expression referring to the Iteration Key (further explanation below)
 Declared Iteration End|Indicates the end of the declared iteration
-Iterated Expression Begin|Indicates that a iterated expression is here
+Iterated Expression Begin|Indicates that an iterated expression is here
 Declared Iteration Key (or Iteration Key)|Is the reference to the declared iteration, the function associated will be run and its result will replace this expression (further explanation below)
-Iterated Expression End|Idicates the end of the iterated expression
+Iterated Expression End|Indicates the end of the iterated expression
 
 ##### Template Functions
 These functions must have instance variables associated, so there can be a real iteration process, the invoked function must return a string with the result of the next value to place into each iterated expression, these functions must be annotated with the @TemplateFunction annotation and fulfill the following contract:
@@ -91,7 +91,8 @@ Although I still have some new features to be implemented that I've got on my mi
 
 Feature on mind | Why? | Desired target version
 ----------------|------|-----------------------
-Send callback instatiator for custom template functions to processor | Allows multiple processor runs with multiple custom template functions instances with a single template, it also would keep away a developer from not creating a new instance when creating a new processor, leading to unexpected behavior | 1.1~1.5
-Upgrade ternary operation to actually evaluate a condition | Allows more options when creating a mapped expression | 1.1~1.5
+Send callback concrete factory function for custom template functions to processor | Allows multiple processor runs with multiple custom template function instances with a single template, it also would keep away a developer from not creating a new instance when creating a new processor, leading to unexpected behavior | 1.1~1.5
+Upgrade ternary operator to actually evaluate a condition | Allows more options when creating a mapped expression with a ternary operator | 1.1~1.5
 Upgrade custom pipe functions to allow parameter passing | Allows wider custom pipe functions reusability, implies a tiny syntax upgrade | 1.5
+Upgrade custom template functions to allow parameter passing | Don't know really, it could improve reusability of template functions, but the idea doesn't convince me yet | 1.5
 Implement sub-templates and sub-maps | It would increase the range of options to artifact generation, but this implies a great syntax upgrade, a massive tweaking of the entire engine and giant overhaul of @artefacter/ui | 2.0
