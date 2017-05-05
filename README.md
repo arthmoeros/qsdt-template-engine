@@ -96,3 +96,9 @@ Upgrade ternary operator to actually evaluate a condition | Allows more options 
 Upgrade custom pipe functions to allow parameter passing | Allows wider custom pipe functions reusability, implies a tiny syntax upgrade | 1.5
 Upgrade custom template functions to allow parameter passing | Don't know really, it could improve reusability of template functions, but the idea doesn't convince me yet | 1.5
 Implement sub-templates and sub-maps | It would increase the range of options to artifact generation, but this implies a great syntax upgrade, a massive tweaking of the entire engine and giant overhaul of @artefacter/ui | 2.0
+
+### Could I get some help with atmpl syntax? - Visual Studio Code Extension
+
+I'm working on a little syntax extension for Visual Studio Code, it colors mapped expressions, iterated expressions and declared iterations, just like the screenshots above, it even colors sub-templates, although just like I implied, these aren't supported by the engine for now.
+
+The extension isn't published on the marketplace yet, I have yet to document it a bit, but should be ready soon.
