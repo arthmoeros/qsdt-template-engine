@@ -6,7 +6,7 @@ import { MappedExpression } from "./../entity/mapped-expression";
 
 /**
  * @class TemplateContainer
- * @see npm @artifacter/template-processor
+ * @see npm @artifacter/template-engine
  * @see also README.md of this project for an explanation about atmpl files
  * @author arthmoeros (Arturo Saavedra) artu.saavedra@gmail.com
  * 

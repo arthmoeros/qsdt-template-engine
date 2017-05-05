@@ -4,7 +4,7 @@
   "description": "Artifacter's template processing engine",
   "main": "index.ts",
   "scripts": {
-    "test": "ts-node -P .\\src .\\src\\run-test.ts"
+    "test": "ts-node --no-ignore -P .\\src .\\src\\run-test.ts"
   },
   "repository": {
     "type": "git",

@@ -4,7 +4,7 @@ import { CoreTemplateFunctions } from "./core/core-template-functions";
 
 /**
  * @class TemplateFunctionsProcessor
- * @see npm @artifacter/template-processor
+ * @see npm @artifacter/template-engine
  * @see also README.md of this project for an explanation about atmpl files and custom def functions
  * @author arthmoeros (Arturo Saavedra) artu.saavedra@gmail.com
  * 
@@ -28,7 +28,7 @@ export class TemplateFunctionsProcessor {
 	}
 
 	/**
-	 * Invokes a function contained in configured def-functions.ts
+	 * Invokes a template function in the core or custom (if provided)
 	 * @param func Function's name
 	 */
 	public invoke(func: string): string {
@@ -36,11 +36,11 @@ export class TemplateFunctionsProcessor {
 		let customTmplFunctions = this.customTmplFunctions;
 		let coreTmplFunction = coreTmplFunctions[func];
 		if (coreTmplFunction && Reflect.getMetadata(Annotation.TemplateFunction, coreTmplFunctions, func)) {
-			return coreTmplFunction();
+			return coreTmplFunction.apply(coreTmplFunctions);
 		} else if (customTmplFunctions) {
 			let customTmplFunction = customTmplFunctions[func];
 			if (customTmplFunction && Reflect.getMetadata(Annotation.TemplateFunction, customTmplFunctions, func)) {
-				return customTmplFunction();
+				return customTmplFunction.apply(customTmplFunctions);
 			} else {
 				throw new Error("Unknown TemplateFunction: Didn't recognize TemplateFunction named '" + func + "' in CoreTemplateFunctions neither in CustomTemplateFunctions provided (maybe decorator is missing or method is not defined)");
 			}

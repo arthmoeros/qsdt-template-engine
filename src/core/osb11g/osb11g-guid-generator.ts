@@ -5,7 +5,7 @@ import * as hashcode from "hashcode";
 
 /**
  * @class Osb11gGuidGenerator
- * @see npm @artifacter/template-processor
+ * @see npm @artifacter/template-engine
  * @author arthmoeros (Arturo Saavedra) artu.saavedra@gmail.com
  * 
  * This Class is a Port of the com.bea.wli.sb.util.Guid#generateGuid method from

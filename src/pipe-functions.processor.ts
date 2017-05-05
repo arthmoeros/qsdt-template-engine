@@ -4,7 +4,7 @@ import { CorePipeFunctions } from "./core/core-pipe-functions";
 
 /**
  * @class PipeFunctionsProcessor
- * @see npm @artifacter/template-processor
+ * @see npm @artifacter/template-engine
  * @see also README.md of this project for an explanation about atmpl files and custom pipe functions
  * @author arthmoeros (Arturo Saavedra) artu.saavedra@gmail.com
  * 
