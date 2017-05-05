@@ -101,4 +101,4 @@ Implement sub-templates and sub-maps | It would increase the range of options to
 
 I'm working on a little syntax extension for Visual Studio Code, it colors mapped expressions, iterated expressions and declared iterations, just like the screenshots above, it even colors sub-templates, although just like I have implied, these aren't supported by the engine for now.
 
-The extension isn't published on the marketplace yet, I have yet to document it a bit, but should be ready soon.
+The extension is available at the Visual Studio Code Marketplace as "Artifacter Template", here is a link -> [Click Here](https://marketplace.visualstudio.com/items?itemName=arthmoeros.artifacter-template)
