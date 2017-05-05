@@ -24,10 +24,9 @@
   },
   "homepage": "https://github.com/arthmoeros/artifacter-template-engine#readme",
   "dependencies": {
-    "@artifacter/common": "^0.9.0",
+    "@artifacter/common": "^0.9.3",
     "@types/node": "^7.0.14",
     "hashcode": "^1.0.3",
-    "ip": "^1.1.5",
-    "replaceall": "^0.1.6"
+    "ip": "^1.1.5"
   }
 }
