@@ -81,7 +81,7 @@ function templateFunction(): string{
 
 Must not have parameters and must return a string, this might change in the future, should the necessity arises of a template function with parameters. Just like Pipe Functions, these will be validated by the engine.
 
-### What's coming next? - Planned features for a future release
+#### What's coming next? - Planned features for a future release
 
 For now my goal was to get a better handle at Node.JS API and the whole scene, so I'm looking to get a stable release with the existing features, I'm well aware that there are other template engines even more powerful than this one, but I wanted to build one myself and make it the most simple possible without trading off too much power.
 
