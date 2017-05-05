@@ -99,6 +99,6 @@ Implement sub-templates and sub-maps | It would increase the range of options to
 
 ### Could I get some help with atmpl syntax? - Visual Studio Code Extension
 
-I'm working on a little syntax extension for Visual Studio Code, it colors mapped expressions, iterated expressions and declared iterations, just like the screenshots above, it even colors sub-templates, although just like I implied, these aren't supported by the engine for now.
+I'm working on a little syntax extension for Visual Studio Code, it colors mapped expressions, iterated expressions and declared iterations, just like the screenshots above, it even colors sub-templates, although just like I have implied, these aren't supported by the engine for now.
 
 The extension isn't published on the marketplace yet, I have yet to document it a bit, but should be ready soon.
