@@ -25,6 +25,11 @@ export class TemplateProcessor {
 	private atmplContainer: TemplateContainer;
 
 	/**
+	 * Added template parameters for parameterized expressions
+	 */
+	private templateParameters: any;
+
+	/**
 	 * PipeFunctions processor
 	 */
 	private pipeFunctionsProcessor: PipeFunctionsProcessor;
@@ -61,6 +66,15 @@ export class TemplateProcessor {
 	}
 
 	/**
+	 * Sets up Template Parameters for use with parameterized expressions, if the processed
+	 * template has parameterized expressions, these parameters must be set before the 
+	 * processor is run, otherwise it will raise an error
+	 */
+	public setTemplateParameters(templateParameters: any){
+		this.templateParameters = templateParameters;
+	}
+
+	/**
 	 * Runs the processor, checks if atmpl is invalid or if the map is empty.
 	 * This process puts the map's values into the mapped expressions following their defined 
 	 * instructions.
@@ -84,6 +98,14 @@ export class TemplateProcessor {
 			var mapExpr = this.atmplContainer.$mapExprList[index];
 			if (mapExpr.$isIterated) {
 				workingResult.replaceRange(mapExpr.$startIndex, mapExpr.$endIndex, this.retrieveValueFromIterDec(mapExpr.$mappedKey));;
+			} else if (mapExpr.$isParameterized) {
+				if(this.templateParameters == null){
+					throw new Error("Invalid Processor state: found Parameterized Expression, but no template parameters are set");
+				}else if(this.templateParameters[mapExpr.$mappedKey] == null){
+					console.warn("Expected parameter name '" + mapExpr.$mappedKey + "', but provided template parameters doesn't have a value associated with it, expect an invalid generated artifact from template located in '" + this.atmplContainer.$filename + "'");
+				}else{
+					workingResult.replaceRange(mapExpr.$startIndex, mapExpr.$endIndex, this.templateParameters[mapExpr.$mappedKey]);;
+				}
 			} else {
 				let mappedValue: string = map.get(mapExpr.$mappedKey);
 				if (mappedValue == undefined && !mapExpr.$isOptional && !this.atmplContainer.$optionalityByDefault) {
