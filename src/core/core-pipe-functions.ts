@@ -1,4 +1,4 @@
-import { StringHandlerUtil, PipeFunction } from "@artifacter/common";
+import { StringHandlerUtil, PipeFunction, StringContainer } from "@artifacter/common";
 
 /**
  * @class CorePipeFunctions
@@ -12,6 +12,7 @@ import { StringHandlerUtil, PipeFunction } from "@artifacter/common";
  * 
  */
 export class CorePipeFunctions {
+
 
 	/**
 	 * All Upper Case
@@ -31,6 +32,34 @@ export class CorePipeFunctions {
 	public alc(str: string): string {
 		str = str.toUpperCase();
 		return str;
+	}
+
+	/**
+	 * Starts with Upper Case
+	 */
+	@PipeFunction()
+	public suc(str: string): string {
+		if (str == "") {
+			return "";
+		} else if (str.length == 1) {
+			return str.toUpperCase();
+		} else {
+			return str.charAt(0).toUpperCase() + str.substr(1);
+		}
+	}
+
+	/**
+	 * Starts with Lower Case
+	 */
+	@PipeFunction()
+	public slc(str: string): string {
+		if (str == "") {
+			return "";
+		} else if (str.length == 1) {
+			return str.toLowerCase();
+		} else {
+			return str.charAt(0).toLowerCase() + str.substr(1);
+		}
 	}
 
 	/**
@@ -67,6 +96,47 @@ export class CorePipeFunctions {
 		} else {
 			return "_" + str;
 		}
+	}
+
+	/**
+	 * Prefixes the string with a forward slash
+	 * TODO: When pipe-functions engine is improved to support parameters, switch this function to
+	 * support an additional prefix string argument
+	 * @param str
+	 */
+	@PipeFunction()
+	public prefixFwdSlash(str: string): string {
+		if (str == "") {
+			return "";
+		} else {
+			return "/" + str;
+		}
+	}
+
+	/**
+	 * Prefixes the string with a dot
+	 * TODO: When pipe-functions engine is improved to support parameters, switch this function to
+	 * support an additional prefix string argument
+	 * @param str
+	 */
+	@PipeFunction()
+	public prefixDot(str: string): string {
+		if (str == "") {
+			return "";
+		} else {
+			return "." + str;
+		}
+	}
+
+	/**
+	 * Underscore Replaces Dot
+	 * Replaces all dots with an underscore
+	 * TODO: When pipe-functions engine is improved to support parameters, switch this function to
+	 * a more generic string search and replace function
+	 */
+	@PipeFunction()
+	public urd(str: string): string {
+		return new StringContainer(str).replaceAll(".", "_").toString();
 	}
 
 	/**
