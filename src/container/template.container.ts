@@ -20,7 +20,7 @@ import { MappedExpression } from "./../entity/mapped-expression";
  * It does additional syntax checking and consistency validations.
  * 
  */
-export class TemplateContainer{
+export class TemplateContainer {
 
 	public static readonly msgTmplInvalid: string = "Invalid template?: Couldn't find any matching expression in the template, maybe isn't a valid template or expressions have syntax errors";
 	public static readonly msgIterInvalid: string = "Invalid iterated mapped expressions!: Found iterated mapped expression(s), but couldn't find an Declared Iteration";
@@ -51,6 +51,11 @@ export class TemplateContainer{
 	private iterMapExprList: MappedExpression[] = new Array<MappedExpression>();
 
 	/**
+	 * Lists only parameterized mapped expressions
+	 */
+	private paramMapExprList: MappedExpression[] = new Array<MappedExpression>();
+
+	/**
 	 * Lists Declared Iterations found in the template
 	 */
 	private iterDecList: DeclaredIteration[] = new Array<DeclaredIteration>();
@@ -66,10 +71,20 @@ export class TemplateContainer{
 	private anonymous: boolean = false;
 
 	/**
+	 * Determines if this anonymous template expressions are all optional by default
+	 */
+	private optionalityByDefault: boolean = false;
+
+	/**
+	 * Determines if this template mustn't be processed (because optionalityByDefault is true and no expressions were found)
+	 */
+	private skip: boolean = false;
+
+	/**
 	 * Constructs a TemplateContainer for an anonymous template
 	 * @param stringTmpl string containing the template contents
 	 */
-	constructor(stringTmpl: string);
+	constructor(stringTmpl: string, optionalityByDefault: boolean);
 
 	/**
 	 * Constructs a TemplateContainer for an atmpl template file
@@ -77,21 +92,24 @@ export class TemplateContainer{
 	 * @param fileBuffer atmpl buffer containing the file contents
 	 */
 	constructor(fileName: string, fileBuffer: Buffer);
-	
-	constructor(param1: string, param2?: Buffer){
-		if(param2 != null){
+
+	constructor(param1: string, param2: any) {
+		if (param2 instanceof Buffer) {
 			this.filename = param1;
 			this.fileContents = param2.toString();
-		}else{
+		} else {
 			this.filename = "(anonymous template)";
 			this.fileContents = param1;
 			this.anonymous = true;
+			this.optionalityByDefault = param2 ? param2 : false;
 		}
 
 		this.initializeExpressions();
-		this.checkInvalidExpressions();
-		this.checkIterationDec();
-		this.joinMappedExpressions();
+		if (!this.skip) {
+			this.checkInvalidExpressions();
+			this.checkIterationDec();
+			this.joinMappedExpressions();
+		}
 	}
 
 	/**
@@ -100,50 +118,55 @@ export class TemplateContainer{
 	 * it will throw an error because it is pointless to process a template without recognizable 
 	 * expressions
 	 */
-	private initializeExpressions(){
+	private initializeExpressions() {
 		const mapExpRegex = new RegExp(MappedExpression.regex);
-		
-		while(true){
+
+		while (true) {
 			let result: RegExpExecArray = mapExpRegex.exec(this.fileContents);
-			if(mapExpRegex.lastIndex == 0){
+			if (mapExpRegex.lastIndex == 0) {
 				break;
 			}
 			let expr: MappedExpression = new MappedExpression(result);
-			if(expr.$isIterated){
+			if (expr.$isIterated) {
 				this.iterMapExprList.push(expr);
-			}else{
+			} else if (expr.$isParameterized) {
+				this.paramMapExprList.push(expr);
+			} else {
 				this.normalMapExprList.push(expr);
 			}
 		}
 
-		if(this.normalMapExprList.length == 0 && this.iterMapExprList.length == 0){
-			this.invalid = true;
-			if(this.anonymous){
-				throw new Error(TemplateContainer.msgTmplInvalid + "; Anonymous template contents: " + this.fileContents);
-			}else{
-				throw new Error(TemplateContainer.msgTmplInvalid + "; Template filename: " + this.filename);
+		if (this.normalMapExprList.length == 0 && this.paramMapExprList.length == 0 && this.iterMapExprList.length == 0) {
+			if (this.optionalityByDefault) {
+				this.skip = true;
+			} else {
+				this.invalid = true;
+				if (this.anonymous) {
+					throw new Error(TemplateContainer.msgTmplInvalid + "; Anonymous template contents: " + this.fileContents);
+				} else {
+					throw new Error(TemplateContainer.msgTmplInvalid + "; Template filename: " + this.filename);
+				}
 			}
-			
 		}
 	}
 
 	/**
 	 * Checks for invalid expressions found and reports them with their stored detail for debugging purposes
 	 */
-	private checkInvalidExpressions(){
+	private checkInvalidExpressions() {
 		let errorsFound: StringContainer = new StringContainer();
 		this.normalMapExprList.forEach(mapExpr => {
-			if(mapExpr.$invalidExprMsg){
+			if (mapExpr.$invalidExprMsg) {
 				errorsFound.concat("\nError at ["
-					+mapExpr.$invalidExprMsg.lineNum+","
-					+mapExpr.$invalidExprMsg.colNum+"] expr '"
-					+mapExpr.$invalidExprMsg.expr+"' -> "
-					+mapExpr.$invalidExprMsg.problem);
+					+ mapExpr.$invalidExprMsg.lineNum + ","
+					+ mapExpr.$invalidExprMsg.colNum + "] expr '"
+					+ mapExpr.$invalidExprMsg.expr + "' -> "
+					+ mapExpr.$invalidExprMsg.problem);
 			}
 		});
 
-		if(errorsFound.toString().length > 0){
-			throw new SyntaxError("Template '"+this.filename+"' has invalid expressions, details:"+errorsFound.toString()+"\n---");
+		if (errorsFound.toString().length > 0) {
+			throw new SyntaxError("Template '" + this.filename + "' has invalid expressions, details:" + errorsFound.toString() + "\n---");
 		}
 	}
 
@@ -152,37 +175,37 @@ export class TemplateContainer{
 	 * Also checks if all iterated mapped expressions found have a corresponding Declared Iteration
 	 */
 	private checkIterationDec() {
-		if(this.iterMapExprList.length == 0){
+		if (this.iterMapExprList.length == 0) {
 			return;
 		}
 		const iterDecRegex = new RegExp(DeclaredIteration.regex);
-		
-		while(true){
+
+		while (true) {
 			let result: RegExpExecArray = iterDecRegex.exec(this.fileContents);
-			if(iterDecRegex.lastIndex == 0){
+			if (iterDecRegex.lastIndex == 0) {
 				break;
 			}
 			let def: DeclaredIteration = new DeclaredIteration(result);
 			this.iterDecList.push(def);
 		}
 
-		if(this.iterDecList.length == 0 && this.iterMapExprList.length > 0){
+		if (this.iterDecList.length == 0 && this.iterMapExprList.length > 0) {
 			this.invalid = true;
 			throw new Error(TemplateContainer.msgIterInvalid);
 		}
 
 		this.iterMapExprList.forEach(iterMapExpr => {
-			let iterMapExprKey : string = iterMapExpr.$mappedKey;
+			let iterMapExprKey: string = iterMapExpr.$mappedKey;
 			let defMissing: boolean = true;
 			this.iterDecList.forEach(iterDec => {
-				if(iterDec.$mappedKey == iterMapExpr.$mappedKey){
+				if (iterDec.$mappedKey == iterMapExpr.$mappedKey) {
 					defMissing = false;
 					return;
 				}
 			});
-			if(defMissing){
+			if (defMissing) {
 				this.invalid = true;
-				throw new Error("Iterated mapped expression references '"+iterMapExpr.$mappedKey+"', but couldn't find a matching Declared Iteration");
+				throw new Error("Iterated mapped expression references '" + iterMapExpr.$mappedKey + "', but couldn't find a matching Declared Iteration");
 			}
 		});
 	}
@@ -190,7 +213,7 @@ export class TemplateContainer{
 	/**
 	 * Consolidates normal and iterated expressions in a single list sorted by starting found index in the template
 	 */
-	public joinMappedExpressions(){
+	private joinMappedExpressions() {
 		this.mapExprList = this.normalMapExprList.concat(this.iterMapExprList);
 		this.mapExprList = this.mapExprList.sort(MappedExpression.compareExpr);
 	}
@@ -211,8 +234,16 @@ export class TemplateContainer{
 		return this.iterDecList;
 	}
 
-	public get $invalid(): boolean  {
+	public get $invalid(): boolean {
 		return this.invalid;
 	}
-	
+
+	public get $skip(): boolean {
+		return this.skip;
+	}
+
+	public get $optionalityByDefault(): boolean {
+		return this.optionalityByDefault;
+	}
+
 }

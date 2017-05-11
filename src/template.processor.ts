@@ -37,8 +37,9 @@ export class TemplateProcessor {
 	/**
 	 * Constructs a Template Processor with an anonymous template
 	 * @param stringTmpl string containing template contents
+	 * @param optionalityByDefault makes all mapped expressions optional by default
 	 */
-	constructor(stringTmpl: string);
+	constructor(stringTmpl: string, optionalityByDefault?: boolean);
 
 	/**
 	 * Construct a Templater Processor with an atmpl file and optional custom pipe functions and custom template functions
@@ -49,8 +50,12 @@ export class TemplateProcessor {
 	 */
 	constructor(fileName: string, fileBuffer: Buffer, customPipeFunctions?: any, customTmplFunctions?: any);
 
-	constructor(param1: string, param2?: Buffer, customPipeFunctions?: any, customTmplFunctions?: any) {
-		this.atmplContainer = new TemplateContainer(param1, param2);
+	constructor(param1: string, param2: Buffer | boolean, customPipeFunctions?: any, customTmplFunctions?: any) {
+		if (param2 instanceof Buffer) {
+			this.atmplContainer = new TemplateContainer(param1, param2);
+		} else {
+			this.atmplContainer = new TemplateContainer(param1, param2);
+		}
 		this.pipeFunctionsProcessor = new PipeFunctionsProcessor(customPipeFunctions);
 		this.tmplFunctionsProcessor = new TemplateFunctionsProcessor(customTmplFunctions);
 	}
@@ -65,6 +70,9 @@ export class TemplateProcessor {
 	 * @param map map containing the data to put into mapped expressions
 	 */
 	public run(map: Map<string, string>): string {
+		if(this.atmplContainer.$skip){
+			return this.atmplContainer.$fileContents;
+		}
 		if (this.atmplContainer.$invalid) {
 			throw new Error(TemplateContainer.msgTmplInvalid);
 		}
@@ -78,9 +86,9 @@ export class TemplateProcessor {
 				workingResult.replaceRange(mapExpr.$startIndex, mapExpr.$endIndex, this.retrieveValueFromIterDec(mapExpr.$mappedKey));;
 			} else {
 				let mappedValue: string = map.get(mapExpr.$mappedKey);
-				if (mappedValue == undefined && !mapExpr.$isOptional) {
+				if (mappedValue == undefined && !mapExpr.$isOptional && !this.atmplContainer.$optionalityByDefault) {
 					console.warn("Expected key '" + mapExpr.$mappedKey + "', but provided map doesn't have a value associated with it, expect an invalid generated artifact from template located in '" + this.atmplContainer.$filename + "' or maybe you should set the Mapped Expression as optional");
-				} else if (mappedValue == undefined && mapExpr.$isOptional) {
+				} else if (mappedValue == undefined && (mapExpr.$isOptional || this.atmplContainer.$optionalityByDefault)) {
 					workingResult.replaceRange(mapExpr.$startIndex, mapExpr.$endIndex, "");
 				} else {
 					if (mapExpr.$isTernary) {
@@ -116,25 +124,23 @@ export class TemplateProcessor {
 
 	/**
 	 * Utility static method for boolean evaluation of a single MappedExpression with a corresponding map.
-	 * It will return true only if a value is found from the mappedKey and is not "false", otherwise
+	 * It will return true only if the value found from the mappedKey and is "true" or "1", otherwise
 	 * it returns false
 	 * @param expression String containing a single MappedExpression
 	 * @param map values map to use for processing
 	 */
-	public static evaluateBoolean(expression: string, map: Map<string,string>): boolean {
+	public static evaluateBoolean(expression: string, map: Map<string, string>): boolean {
 		const mapExpRegex = new RegExp(MappedExpression.regex);
 		let result: RegExpExecArray = mapExpRegex.exec(expression);
 		if (mapExpRegex.lastIndex == 0) {
-			throw new Error("Invalid expression '"+expression+"' found trying to evaluate a boolean");
+			throw new Error("Invalid expression '" + expression + "' found trying to evaluate a boolean");
 		}
 		let expr: MappedExpression = new MappedExpression(result);
 		let value: string = map.get(expr.$mappedKey);
 		if (value) {
-			if (value.toLowerCase() == "false") {
-				return false;
-			} else {
-				return true;
-			}
+			return expr.$isNegated ?
+				!(value.toLowerCase() == "true" || value.toLowerCase() == "1") :
+				(value.toLowerCase() == "true" || value.toLowerCase() == "1");
 		} else {
 			return false;
 		}

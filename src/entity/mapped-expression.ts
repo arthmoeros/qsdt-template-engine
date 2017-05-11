@@ -7,8 +7,9 @@ import { StringHandlerUtil } from "@artifacter/common";
  * @author arthmoeros (Arturo Saavedra) artu.saavedra@gmail.com
  * 
  * This Class defines a mapped expression, which are recognized within Artifacter's template
- * engine, it defines the regex for location of normal and iterated mapped expressions and provides
- * a structured interface for the values and configuration that a mapped expression represents
+ * engine, it defines the regex for location of normal, parameterized and iterated mapped 
+ * expressions and provides a structured interface for the values and configuration that a 
+ * mapped expression represents
  * 
  */
 export class MappedExpression {
@@ -21,12 +22,17 @@ export class MappedExpression {
 	/**
 	 * A grouped regex that structures into capture groups the representation of a normal mapped expression
 	 */
-	private static readonly groupedRegex: RegExp = /(&{)(\*)? *(\([a-zA-Z0-9_,]*?\))? *([a-zA-Z0-9_.]*?) *(\?)? *(\"[a-zA-Z0-9_. ]*?\")? *('[a-zA-Z0-9_. ]*?')? *(:)? *(\"[a-zA-Z0-9_. ]*?\")? *('[a-zA-Z0-9_. ]*?')? *(})/g;
+	private static readonly groupedRegex: RegExp = /(&{)(\*)? *(\([a-zA-Z0-9_,]*?\))? *(!)?([a-zA-Z0-9_.]*?) *(\?)? *(\"[a-zA-Z0-9_. ]*?\")? *('[a-zA-Z0-9_. ]*?')? *(:)? *(\"[a-zA-Z0-9_. ]*?\")? *('[a-zA-Z0-9_. ]*?')? *(})/g;
 
 	/**
 	 * A regex with a sharp (#) prefix, which identifies it as an iterated mapped expression
 	 */
 	private static readonly iteratedRegex: RegExp = /(&{#)([a-zA-Z0-9_.]*?)(})/g;
+
+	/**
+	 * A regex with a colon (:) prefix, which identifies it as a parameterized mapped expression
+	 */
+	private static readonly parameterizedRegex: RegExp = /(&{:)([a-zA-Z0-9_.]*?)(})/g;
 
 	/**
 	 * Starting index of the expression where it was found
@@ -51,7 +57,12 @@ export class MappedExpression {
 	/**
 	 * Determines if the expression is a ternary evaluated one
 	 */
-	private isTernary: boolean;
+	private isTernary: boolean = false;
+
+	/**
+	 * Determines if the expression is negated with a !
+	 */
+	private negated: boolean = false;
 
 	/**
 	 * Resulting true value of a ternary expression
@@ -71,7 +82,12 @@ export class MappedExpression {
 	/**
 	 * Determines if the expression is an iterated one
 	 */
-	private isIterated: boolean;
+	private isIterated: boolean = false;
+
+	/**
+	 * Determines if the expression is a parameterized one
+	 */
+	private isParameterized: boolean = false;
 
 	/**
 	 * Provides debugging information for atmpl files development
@@ -92,6 +108,8 @@ export class MappedExpression {
 		if (capturedGroups) {
 			if (this.isIterated) {
 				this.parseIteratedExpr(capturedGroups, foundExpr);
+			} else if (this.isParameterized) {
+				this.parseParameterizedExpr(capturedGroups, foundExpr);
 			} else {
 				this.parseNormalExpr(capturedGroups, foundExpr);
 			}
@@ -110,13 +128,17 @@ export class MappedExpression {
 			regex = new RegExp(MappedExpression.iteratedRegex);
 			resultVal = regex.exec(foundExpr[0]);
 			if (resultVal == null) {
-				let lineCol: [number, number] = StringHandlerUtil.locateLineColumnUpToIndex(foundExpr.input, foundExpr.index);
-				this.invalidExprMsg = { expr: foundExpr[0], lineNum: lineCol[0], colNum: lineCol[1], problem: "Invalid Syntax" };
+				regex = new RegExp(MappedExpression.parameterizedRegex);
+				resultVal = regex.exec(foundExpr[0]);
+				if (resultVal == null) {
+					let lineCol: [number, number] = StringHandlerUtil.locateLineColumnUpToIndex(foundExpr.input, foundExpr.index);
+					this.invalidExprMsg = { expr: foundExpr[0], lineNum: lineCol[0], colNum: lineCol[1], problem: "Invalid Syntax" };
+				} else {
+					this.isParameterized = true;
+				}
 			} else {
 				this.isIterated = true;
 			}
-		} else {
-			this.isIterated = false;
 		}
 		return resultVal;
 	}
@@ -133,16 +155,17 @@ export class MappedExpression {
 		if (capturedGroups[3]) {
 			this.pipeFunctions = this.parsePipeFunctions(capturedGroups[3]);
 		}
-		this.mappedKey = capturedGroups[4];
-		this.isTernary = capturedGroups[5] == "?";
+		this.negated = capturedGroups[4] == "!";
+		this.mappedKey = capturedGroups[5];
+		this.isTernary = capturedGroups[6] == "?";
 		if (this.isTernary) {
-			this.ternaryTrue = capturedGroups[6];
+			this.ternaryTrue = capturedGroups[7];
 			if (!this.ternaryTrue) {
-				this.ternaryTrue = capturedGroups[7];
+				this.ternaryTrue = capturedGroups[8];
 			}
-			this.ternaryFalse = capturedGroups[9];
+			this.ternaryFalse = capturedGroups[10];
 			if (!this.ternaryFalse) {
-				this.ternaryFalse = capturedGroups[10];
+				this.ternaryFalse = capturedGroups[11];
 			}
 			if (this.ternaryTrue) {
 				this.ternaryTrue = this.ternaryTrue.substring(1, this.ternaryTrue.length - 1);
@@ -161,6 +184,17 @@ export class MappedExpression {
 	 * @param foundExpr original regex exec result of a potential Mapped Expression
 	 */
 	private parseIteratedExpr(capturedGroups: RegExpExecArray, foundExpr: RegExpExecArray) {
+		this.mappedKey = capturedGroups[2];
+		this.startIndex = foundExpr.index;
+		this.endIndex = this.startIndex + foundExpr[0].length;
+	}
+
+	/**
+	 * Parses the regex exec result to a parameterized Mapped Expression
+	 * @param capturedGroups regex exec result of a valid parameterized Mapped Expression
+	 * @param foundExpr original regex exec result of a potential Mapped Expression
+	 */
+	private parseParameterizedExpr(capturedGroups: RegExpExecArray, foundExpr: RegExpExecArray) {
 		this.mappedKey = capturedGroups[2];
 		this.startIndex = foundExpr.index;
 		this.endIndex = this.startIndex + foundExpr[0].length;
@@ -239,8 +273,16 @@ export class MappedExpression {
 		return this.isIterated;
 	}
 
+	public get $isParameterized(): boolean {
+		return this.isParameterized;
+	}
+
 	public get $isOptional(): boolean {
 		return this.isOptional;
+	}
+
+	public get $isNegated(): boolean {
+		return this.negated;
 	}
 
 	public get $invalidExprMsg(): {
