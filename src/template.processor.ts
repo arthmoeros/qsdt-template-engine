@@ -70,7 +70,7 @@ export class TemplateProcessor {
 	 * template has parameterized expressions, these parameters must be set before the 
 	 * processor is run, otherwise it will raise an error
 	 */
-	public setTemplateParameters(templateParameters: any){
+	public setTemplateParameters(templateParameters: any) {
 		this.templateParameters = templateParameters;
 	}
 
@@ -84,7 +84,7 @@ export class TemplateProcessor {
 	 * @param map map containing the data to put into mapped expressions
 	 */
 	public run(map: Map<string, string>): string {
-		if(this.atmplContainer.$skip){
+		if (this.atmplContainer.$skip) {
 			return this.atmplContainer.$fileContents;
 		}
 		if (this.atmplContainer.$invalid) {
@@ -99,11 +99,11 @@ export class TemplateProcessor {
 			if (mapExpr.$isIterated) {
 				workingResult.replaceRange(mapExpr.$startIndex, mapExpr.$endIndex, this.retrieveValueFromIterDec(mapExpr.$mappedKey));;
 			} else if (mapExpr.$isParameterized) {
-				if(this.templateParameters == null){
+				if (this.templateParameters == null) {
 					throw new Error("Invalid Processor state: found Parameterized Expression, but no template parameters are set");
-				}else if(this.templateParameters[mapExpr.$mappedKey] == null){
+				} else if (this.templateParameters[mapExpr.$mappedKey] == null) {
 					console.warn("Expected parameter name '" + mapExpr.$mappedKey + "', but provided template parameters doesn't have a value associated with it, expect an invalid generated artifact from template located in '" + this.atmplContainer.$filename + "'");
-				}else{
+				} else {
 					let paramProcessor: TemplateProcessor = new TemplateProcessor(this.templateParameters[mapExpr.$mappedKey], true);
 					workingResult.replaceRange(mapExpr.$startIndex, mapExpr.$endIndex, paramProcessor.run(map));
 				}
@@ -159,11 +159,15 @@ export class TemplateProcessor {
 			throw new Error("Invalid expression '" + expression + "' found trying to evaluate a boolean");
 		}
 		let expr: MappedExpression = new MappedExpression(result);
-		let value: string = map.get(expr.$mappedKey);
-		if (value) {
-			return expr.$isNegated ?
-				!(value.toLowerCase() == "true" || value.toLowerCase() == "1") :
-				(value.toLowerCase() == "true" || value.toLowerCase() == "1");
+		let value: any = map.get(expr.$mappedKey);
+		if (value != null) {
+			if (typeof (value) == "boolean") {
+				return expr.$isNegated ? !value : value;
+			} else {
+				return expr.$isNegated ?
+					!(value.toLowerCase() == "true" || value.toLowerCase() == "1") :
+					(value.toLowerCase() == "true" || value.toLowerCase() == "1");
+			}
 		} else {
 			return false;
 		}
