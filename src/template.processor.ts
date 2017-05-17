@@ -104,7 +104,8 @@ export class TemplateProcessor {
 				}else if(this.templateParameters[mapExpr.$mappedKey] == null){
 					console.warn("Expected parameter name '" + mapExpr.$mappedKey + "', but provided template parameters doesn't have a value associated with it, expect an invalid generated artifact from template located in '" + this.atmplContainer.$filename + "'");
 				}else{
-					workingResult.replaceRange(mapExpr.$startIndex, mapExpr.$endIndex, this.templateParameters[mapExpr.$mappedKey]);;
+					let paramProcessor: TemplateProcessor = new TemplateProcessor(this.templateParameters[mapExpr.$mappedKey], true);
+					workingResult.replaceRange(mapExpr.$startIndex, mapExpr.$endIndex, paramProcessor.run(map));
 				}
 			} else {
 				let mappedValue: string = map.get(mapExpr.$mappedKey);

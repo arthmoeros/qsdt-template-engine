@@ -1,10 +1,10 @@
 {
   "name": "@artifacter/template-engine",
-  "version": "0.9.5",
+  "version": "0.9.6",
   "description": "Artifacter's template processing engine",
   "main": "index.ts",
   "scripts": {
-    "test": "ts-node --no-ignore -P .\\src .\\src\\run-test.ts"
+    "test": "tsc && ts-node --no-ignore -P .\\src .\\src\\run-test.ts"
   },
   "repository": {
     "type": "git",
@@ -24,7 +24,7 @@
   },
   "homepage": "https://github.com/arthmoeros/artifacter-template-engine#readme",
   "dependencies": {
-    "@artifacter/common": "^0.9.3",
+    "@artifacter/common": "^0.9.11",
     "@types/node": "^7.0.14",
     "hashcode": "^1.0.3",
     "ip": "^1.1.5"
