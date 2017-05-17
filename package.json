@@ -1,10 +1,12 @@
 {
   "name": "@artifacter/template-engine",
-  "version": "0.9.7",
+  "version": "0.9.8",
   "description": "Artifacter's template processing engine",
   "main": "index.ts",
   "scripts": {
-    "test": "tsc && ts-node --no-ignore -P .\\src .\\src\\run-test.ts"
+    "prepublish": "tsc",
+    "pretest": "tsc",
+    "test": "ts-node --no-ignore -P .\\src .\\src\\run-test.ts"
   },
   "repository": {
     "type": "git",
