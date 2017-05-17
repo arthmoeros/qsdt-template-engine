@@ -214,7 +214,7 @@ export class TemplateContainer {
 	 * Consolidates normal and iterated expressions in a single list sorted by starting found index in the template
 	 */
 	private joinMappedExpressions() {
-		this.mapExprList = this.normalMapExprList.concat(this.iterMapExprList);
+		this.mapExprList = this.normalMapExprList.concat(this.iterMapExprList).concat(this.paramMapExprList);
 		this.mapExprList = this.mapExprList.sort(MappedExpression.compareExpr);
 	}
 
