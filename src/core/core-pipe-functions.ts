@@ -30,7 +30,7 @@ export class CorePipeFunctions {
 	 */
 	@PipeFunction()
 	public alc(str: string): string {
-		str = str.toUpperCase();
+		str = str.toLowerCase();
 		return str;
 	}
 

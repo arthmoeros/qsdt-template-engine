@@ -1,6 +1,6 @@
 {
   "name": "@artifacter/template-engine",
-  "version": "0.9.8",
+  "version": "0.9.9",
   "description": "Artifacter's template processing engine",
   "main": "index.ts",
   "scripts": {
