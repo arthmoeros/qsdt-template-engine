@@ -5,6 +5,8 @@ import { DeclaredIteration } from "./entity/declared-iteration";
 import { TemplateContainer } from "./container/template.container";
 import { PipeFunctionsProcessor } from "./pipe-functions.processor";
 import { TemplateFunctionsProcessor } from "./template-functions.processor";
+import { DeclaredIterationProcessor } from "./type/declared-iteration-processor";
+import { CustomPipeFunctions } from "./type/custom-pipe-functions";
 
 const subTmplReged = new RegExp(/(::)*([a-zA-Z0-9_./]*?)*(::)/g);
 /**
@@ -51,9 +53,9 @@ export class TemplateProcessor {
 	 * @param fileName atmpl file name
 	 * @param fileBuffer atmpl Buffer with atmpl contents
 	 * @param customPipeFunctions Custom Pipe Functions to use, it must contain methods annotated with @PipeFunction
-	 * @param customTmplFunctions Custom Template Functions to use, it must contain methods annotated with @TemplateFunction
+	 * @param declaredIterationProcessors Custom Template Functions to use, it must contain methods annotated with @TemplateFunction
 	 */
-	constructor(fileName: string, fileBuffer: Buffer, customPipeFunctions?: any, customTmplFunctions?: any);
+	constructor(fileName: string, fileBuffer: Buffer, customPipeFunctions?: CustomPipeFunctions, declaredIterationProcessors?: DeclaredIterationProcessor[]);
 
 	constructor(param1: string, param2: Buffer | boolean, customPipeFunctions?: any, customTmplFunctions?: any) {
 		if (param2 instanceof Buffer) {
