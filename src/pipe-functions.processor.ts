@@ -13,7 +13,7 @@ import { CustomPipeFunctions } from "./core/custom-pipe-functions";
  * containing pipeFunctions definition
  * 
  */
-export class PipeFunctionsProcessor{
+export class PipeFunctionsProcessor {
 
 	private static readonly corePipeFunctions: CorePipeFunctions = new CorePipeFunctions();
 	private customPipeFunctions: CustomPipeFunctions;
@@ -23,7 +23,7 @@ export class PipeFunctionsProcessor{
 	 * added to a CustomPipeFunctions instance
 	 * @param customPipeFunctions Instance of a CustomPipeFunctions to use
 	 */
-	constructor(customPipeFunctions?: CustomPipeFunctions){
+	constructor(customPipeFunctions?: CustomPipeFunctions) {
 		this.customPipeFunctions = customPipeFunctions;
 	}
 
@@ -34,37 +34,42 @@ export class PipeFunctionsProcessor{
 	 * @param functions array of pipe functions names and parameters
 	 * @param inputValue input value to process in the pipes
 	 */
-	public invoke(functions: string[], inputValue: string): string{
+	public invoke(functions: string[], inputValue: string): string {
 		let corePipeFunctions = PipeFunctionsProcessor.corePipeFunctions;
 		let customPipeFunctions = this.customPipeFunctions;
 		let result: string = inputValue;
 		functions.forEach(func => {
-			let pipeFunction: {name: string, parameters: string[]} = this.parsePipeFunction(func);
-			let corePipeFunction = corePipeFunctions[func];
-			if(corePipeFunction != null && Reflect.getMetadata(Annotation.PipeFunction, corePipeFunctions, func)){
-				this.checkMethodIsValidPipeFunction(corePipeFunctions, func);
-				result = corePipeFunction(result);
-			}else if(customPipeFunctions != null){
-				let customPipeFunction = customPipeFunctions[func];
-				if(customPipeFunction != null && Reflect.getMetadata(Annotation.PipeFunction, customPipeFunctions, func)){
-					this.checkMethodIsValidPipeFunction(customPipeFunctions, func);
-					result = customPipeFunction(result);
-				}else{
-					throw new Error("Unknown PipeFunction: Didn't recognize PipeFunction named '"+func+"' in CorePipeFunctions neither in CustomPipeFunctions provided  (maybe decorator is missing or method is not defined)");
+			let pipeFunction: { name: string, parameters?: string[] } = this.parsePipeFunction(func);
+			let corePipeFunction: Function = corePipeFunctions[pipeFunction.name];
+			if (corePipeFunction != null) {
+				let args: string[] = [result]
+				if (pipeFunction.parameters != null) {
+					args = args.concat(pipeFunction.parameters);
 				}
-			}else{
-				throw new Error("Unknown PipeFunction: Didn't recognize PipeFunction named '"+func+"' in CorePipeFunctions");
+				result = corePipeFunction.apply(null, args);
+			} else if (customPipeFunctions != null) {
+				result = customPipeFunctions.invoke(pipeFunction.name, result, pipeFunction.parameters);
+			} else {
+				throw new Error("Unknown PipeFunction: Didn't recognize PipeFunction named '" + func + "' in CorePipeFunctions and no CustomPipeFunctions were defined");
 			}
 		});
 		return result;
 	}
 
-	private parsePipeFunction(func: string) : {name: string, parameters: string[]}{
-		let name: string = func.substring(0, func.indexOf("["));
-		let parameters: string[] = func.substring(func.indexOf("[")+1, func.indexOf("]")).split(",");
-		for (var index = 0; index < parameters.length; index++) {
-			parameters[index] = parameters[index].trim();
+	private parsePipeFunction(func: string): { name: string, parameters?: string[] } {
+		if (func.indexOf("[") != -1) {
+			let name: string = func.substring(0, func.indexOf("["));
+			let parameters: string[] = func.substring(func.indexOf("[") + 1, func.indexOf("]")).split(",");
+			for (var index = 0; index < parameters.length; index++) {
+				var param = parameters[index].trim();
+				if(param.indexOf("'") == 0 || param.indexOf("\"") == 0){
+					param = param.substr(1,param.length-1);
+				}
+				parameters[index] = param;
+			}
+			return { name: name, parameters: parameters };
+		}else{
+			return { name: name };
 		}
-		return { name : name, parameters : parameters };
 	}
 }

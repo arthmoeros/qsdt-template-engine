@@ -20,7 +20,7 @@ export class CustomPipeFunctions {
     }
 
     /**
-     * Invokes an available pipe function, meant to be used by the processor
+     * Invokes an available pipe function, meant to be used by the pipe functions processor
      * 
      * @param functionName name of the function
      * @param inputValue input value to process
@@ -28,12 +28,13 @@ export class CustomPipeFunctions {
      */
     public invoke(functionName: string, inputValue: string, parameters?: string[]): string {
         if(this.functions[functionName] == null){
-            throw new Error("Unknown Custom Pipe Function requested: "+functionName+"("+inputValue+","+parameters+")");
+            throw new Error("Unknown Custom Pipe Function requested: "+functionName+"("+inputValue+(parameters != null ? ","+parameters+")": ")"));
         }
         let func: Function = this.functions[functionName];
-        let args: string[] = new Array<string>();
-        args.push(inputValue);
-        args = args.concat(parameters);
+        let args: string[] = [inputValue];
+        if(parameters != null){
+            args = args.concat(parameters);
+        }
         return func.apply(null, args);
     }
 }

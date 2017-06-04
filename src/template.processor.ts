@@ -5,8 +5,8 @@ import { DeclaredIteration } from "./entity/declared-iteration";
 import { TemplateContainer } from "./container/template.container";
 import { PipeFunctionsProcessor } from "./pipe-functions.processor";
 import { TemplateFunctionsProcessor } from "./template-functions.processor";
-import { DeclaredIterationProcessor } from "./type/declared-iteration-processor";
-import { CustomPipeFunctions } from "./type/custom-pipe-functions";
+import { DeclaredIterationProcessor } from "./core/declared-iteration-processor";
+import { CustomPipeFunctions } from "./core/custom-pipe-functions";
 
 const subTmplReged = new RegExp(/(::)*([a-zA-Z0-9_./]*?)*(::)/g);
 /**
