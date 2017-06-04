@@ -1,6 +1,7 @@
 import { Annotation } from "@artifacter/common";
 
 import { CorePipeFunctions } from "./core/core-pipe-functions";
+import { CustomPipeFunctions } from "./core/custom-pipe-functions";
 
 /**
  * @class PipeFunctionsProcessor
@@ -15,22 +16,22 @@ import { CorePipeFunctions } from "./core/core-pipe-functions";
 export class PipeFunctionsProcessor{
 
 	private static readonly corePipeFunctions: CorePipeFunctions = new CorePipeFunctions();
-	private customPipeFunctions: any;
+	private customPipeFunctions: CustomPipeFunctions;
 
 	/**
-	 * Creates a PipeFunctionsProcessor, it can be supplied with custom functions from
-	 * any instance, the contained methods must be annotated with @PipeFunction to be
-	 * recognized as such
+	 * Creates a PipeFunctionsProcessor, it can be supplied with custom functions previously
+	 * added to a CustomPipeFunctions instance
 	 * @param customPipeFunctions Instance of a CustomPipeFunctions to use
 	 */
-	constructor(customPipeFunctions?: any){
+	constructor(customPipeFunctions?: CustomPipeFunctions){
 		this.customPipeFunctions = customPipeFunctions;
 	}
 
 	/**
 	 * Invokes the pipeFunctions in sequential order, passing the processed
-	 * value to the next one and returing the result of the last one
-	 * @param functions array of pipe functions names
+	 * value to the next one and returing the result of the last one, core functions are prioritized
+	 * over custom in case a duplicate function name occurs
+	 * @param functions array of pipe functions names and parameters
 	 * @param inputValue input value to process in the pipes
 	 */
 	public invoke(functions: string[], inputValue: string): string{
@@ -38,6 +39,7 @@ export class PipeFunctionsProcessor{
 		let customPipeFunctions = this.customPipeFunctions;
 		let result: string = inputValue;
 		functions.forEach(func => {
+			let pipeFunction: {name: string, parameters: string[]} = this.parsePipeFunction(func);
 			let corePipeFunction = corePipeFunctions[func];
 			if(corePipeFunction != null && Reflect.getMetadata(Annotation.PipeFunction, corePipeFunctions, func)){
 				this.checkMethodIsValidPipeFunction(corePipeFunctions, func);
@@ -57,14 +59,12 @@ export class PipeFunctionsProcessor{
 		return result;
 	}
 
-	private checkMethodIsValidPipeFunction(instance: any, func: string){
-		let designParamTypes = Reflect.getMetadata("design:paramtypes", instance, func);
-		let designReturnType = Reflect.getMetadata("design:returntype", instance, func);
-		if(designParamTypes == null || !(designParamTypes.length == 1 && designParamTypes[0].name == "String")){
-			throw new Error("Invalid PipeFunction: found PipeFunction named '"+func+"', but it doesn't match the paramtypes requirement of [String]");
+	private parsePipeFunction(func: string) : {name: string, parameters: string[]}{
+		let name: string = func.substring(0, func.indexOf("["));
+		let parameters: string[] = func.substring(func.indexOf("[")+1, func.indexOf("]")).split(",");
+		for (var index = 0; index < parameters.length; index++) {
+			parameters[index] = parameters[index].trim();
 		}
-		if(designReturnType == null || designReturnType.name != "String"){
-			throw new Error("Invalid PipeFunction: found PipeFunction named '"+func+"', but it doesn't match the returntype requirement of [String]");
-		}
+		return { name : name, parameters : parameters };
 	}
 }

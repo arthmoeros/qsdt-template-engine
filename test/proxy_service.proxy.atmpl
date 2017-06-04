@@ -23,7 +23,7 @@
     <tran:provider-id>http</tran:provider-id>
     <tran:inbound>true</tran:inbound>
     <tran:URI>
-      <env:value>/OSB_&{(auc)bizDomain}_&{(auc)bizEntity}/&{(sixPaddLeftZero)serviceId}_&{serviceName}&{*(prefixUnderscore)serviceType}_&{(auc)serviceVersion}</env:value>
+      <env:value>/OSB_&{(auc)bizDomain}_&{(auc)bizEntity}/&{(paddleft[6,'0'], prefix['_'])serviceId}_&{serviceName}&{*(prefixUnderscore)serviceType}_&{(auc)serviceVersion}</env:value>
     </tran:URI>
     <tran:inbound-properties/>
     <tran:all-headers>false</tran:all-headers>

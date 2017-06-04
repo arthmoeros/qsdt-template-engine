@@ -1,4 +1,4 @@
-import { DeclaredIterationProcessor } from "./../type/declared-iteration-processor";
+import { DeclaredIterationProcessor } from "./declared-iteration-processor";
 import { Osb11gGuidGenerator } from "./osb11g/osb11g-guid-generator";
 
 export class Osb11gGuid extends DeclaredIterationProcessor{

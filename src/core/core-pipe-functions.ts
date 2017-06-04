@@ -1,4 +1,4 @@
-import { StringHandlerUtil, PipeFunction, StringContainer } from "@artifacter/common";
+import { StringHandlerUtil, StringContainer } from "@artifacter/common";
 
 /**
  * @class CorePipeFunctions
@@ -13,32 +13,15 @@ import { StringHandlerUtil, PipeFunction, StringContainer } from "@artifacter/co
  */
 export class CorePipeFunctions {
 
-
-	/**
-	 * All Upper Case
-	 * @param str 
-	 */
-	@PipeFunction()
-	public auc(str: string): string {
+	private coreAUC = (str: string): string => {
 		str = str.toUpperCase();
 		return str;
-	}
-
-	/**
-	 * All Lower Case
-	 * @param str 
-	 */
-	@PipeFunction()
-	public alc(str: string): string {
+	};
+	private coreALC = (str: string): string => {
 		str = str.toLowerCase();
 		return str;
-	}
-
-	/**
-	 * Starts with Upper Case
-	 */
-	@PipeFunction()
-	public suc(str: string): string {
+	};
+	private coreSUC = (str: string): string => {
 		if (str == "") {
 			return "";
 		} else if (str.length == 1) {
@@ -46,13 +29,8 @@ export class CorePipeFunctions {
 		} else {
 			return str.charAt(0).toUpperCase() + str.substr(1);
 		}
-	}
-
-	/**
-	 * Starts with Lower Case
-	 */
-	@PipeFunction()
-	public slc(str: string): string {
+	};
+	private coreSLC = (str: string): string => {
 		if (str == "") {
 			return "";
 		} else if (str.length == 1) {
@@ -60,92 +38,95 @@ export class CorePipeFunctions {
 		} else {
 			return str.charAt(0).toLowerCase() + str.substr(1);
 		}
-	}
-
-	/**
-	 * Fills a number string zero-padding the left until its
-	 * length reaches 6.
-	 * TODO: When pipe-functions engine is improved to support parameters, switch this function to
-	 * support an additional length argument
-	 * @param str 
-	 */
-	@PipeFunction()
-	public sixPaddLeftZero(str: string): string {
-		if (str.length >= 6) {
-			return str.substr(str.length - 6, 6);
+	};
+	private corePaddLeft = (str: string, repstr: string, char: string): string => {
+		var rep = parseInt(repstr);
+		if (str.length >= rep) {
+			return str.substr(str.length - rep, rep);
 		} else {
-			var remaining = 6 - str.length;
-			var zeroes = "";
+			var remaining = rep - str.length;
+			var chars = "";
 			for (var index = 0; index < remaining; index++) {
-				zeroes = zeroes.concat("0");
+				chars = chars.concat(char);
 			}
-			return zeroes.concat(str);
+			return chars.concat(str);
 		}
-	}
+	};
+	private corePreffix = (str: string, prefix: string): string => {
+		if (str == "") {
+			return "";
+		} else {
+			return prefix + str;
+		}
+	};
+	private coreReplace = (str: string, find: string, repl: string): string => {
+		return new StringContainer(str).replaceAll(find, repl).toString();
+	};
+	private coreCC2Dashed = (str: string): string => {
+		return StringHandlerUtil.convertCamelCaseToDashed(str);
+	};
+
 
 	/**
-	 * Prefixes the string with an underscore
-	 * TODO: When pipe-functions engine is improved to support parameters, switch this function to
-	 * support an additional prefix string argument
+	 * All Upper Case
 	 * @param str 
 	 */
-	@PipeFunction()
-	public prefixUnderscore(str: string): string {
-		if (str == "") {
-			return "";
-		} else {
-			return "_" + str;
-		}
+	public get auc(): (value: string, ...args: string[]) => string {
+		return this.coreAUC;
 	}
 
 	/**
-	 * Prefixes the string with a forward slash
-	 * TODO: When pipe-functions engine is improved to support parameters, switch this function to
-	 * support an additional prefix string argument
-	 * @param str
+	 * All Lower Case
+	 * @param str 
 	 */
-	@PipeFunction()
-	public prefixFwdSlash(str: string): string {
-		if (str == "") {
-			return "";
-		} else {
-			return "/" + str;
-		}
+	public get alc(): (value: string, ...args: string[]) => string {
+		return this.coreALC;
 	}
 
 	/**
-	 * Prefixes the string with a dot
-	 * TODO: When pipe-functions engine is improved to support parameters, switch this function to
-	 * support an additional prefix string argument
-	 * @param str
+	 * Starts with Upper Case
 	 */
-	@PipeFunction()
-	public prefixDot(str: string): string {
-		if (str == "") {
-			return "";
-		} else {
-			return "." + str;
-		}
+	public get suc(): (value: string, ...args: string[]) => string {
+		return this.coreSUC;
 	}
 
 	/**
-	 * Underscore Replaces Dot
-	 * Replaces all dots with an underscore
-	 * TODO: When pipe-functions engine is improved to support parameters, switch this function to
-	 * a more generic string search and replace function
+	 * Starts with Lower Case
 	 */
-	@PipeFunction()
-	public urd(str: string): string {
-		return new StringContainer(str).replaceAll(".", "_").toString();
+	public get slc(): (value: string, ...args: string[]) => string {
+		return this.coreSUC;
+	}
+
+	/**
+	 * Fills a string with a specified character to the left until its
+	 * length reaches the specified length.
+	 * @param str 
+	 */
+	public get paddLeft(): (value: string, ...args: string[]) => string {
+		return this.corePaddLeft;
+	}
+
+	/**
+	 * Prefixes the string with a specific character
+	 * @param str 
+	 */
+	public get preffix(): (value: string, ...args: string[]) => string {
+		return this.corePreffix;
+	}
+
+	/**
+	 * Replaces the found string with the replacement one, in the specified string
+	 */
+	public get replace(): (value: string, ...args: string[]) => string {
+		return this.coreReplace;
 	}
 
 	/**
 	 * Invokes StringHandlerUtil#convertCamelCaseToDashed
 	 * @param str 
 	 */
-	@PipeFunction()
-	public cc2dashed(str: string): string {
-		return StringHandlerUtil.convertCamelCaseToDashed(str);
+	public get cc2dashed(): (value: string, ...args: string[]) => string {
+		return this.coreCC2Dashed;
 	}
 
 }
