@@ -4,7 +4,7 @@ import { MappedExpression } from "./entity/mapped-expression";
 import { DeclaredIteration } from "./entity/declared-iteration";
 import { TemplateContainer } from "./container/template.container";
 import { PipeFunctionsProcessor } from "./pipe-functions.processor";
-import { TemplateFunctionsProcessor } from "./template-functions.processor";
+import { DeclaredIterationProcessorsMap } from "./declared-iteration-processors-map";
 import { DeclaredIterationProcessor } from "./core/declared-iteration-processor";
 import { CustomPipeFunctions } from "./core/custom-pipe-functions";
 
@@ -37,9 +37,9 @@ export class TemplateProcessor {
 	private pipeFunctionsProcessor: PipeFunctionsProcessor;
 
 	/**
-	 * TemplateFunctionsProcessor processor
+	 * DeclaredIterationProcessorsMap
 	 */
-	private tmplFunctionsProcessor: TemplateFunctionsProcessor;
+	private declaredIterationProcessorsMap: DeclaredIterationProcessorsMap;
 
 	/**
 	 * Constructs a Template Processor with an anonymous template
@@ -57,14 +57,14 @@ export class TemplateProcessor {
 	 */
 	constructor(fileName: string, fileBuffer: Buffer, customPipeFunctions?: CustomPipeFunctions, declaredIterationProcessors?: DeclaredIterationProcessor[]);
 
-	constructor(param1: string, param2: Buffer | boolean, customPipeFunctions?: any, customTmplFunctions?: any) {
+	constructor(param1: string, param2: Buffer | boolean, customPipeFunctions?: CustomPipeFunctions, declaredIterationProcessors?: DeclaredIterationProcessor[]) {
 		if (param2 instanceof Buffer) {
 			this.atmplContainer = new TemplateContainer(param1, param2);
 		} else {
 			this.atmplContainer = new TemplateContainer(param1, param2);
 		}
 		this.pipeFunctionsProcessor = new PipeFunctionsProcessor(customPipeFunctions);
-		this.tmplFunctionsProcessor = new TemplateFunctionsProcessor(customTmplFunctions);
+		this.declaredIterationProcessorsMap = new DeclaredIterationProcessorsMap(declaredIterationProcessors);
 	}
 
 	/**
@@ -95,6 +95,7 @@ export class TemplateProcessor {
 		if (map.size == 0) {
 			throw new Error("Invalid Values Map: map is empty");
 		}
+		this.declaredIterationProcessorsMap.initializeProcessors();
 		let workingResult: StringContainer = new StringContainer(this.atmplContainer.$fileContents);
 		for (var index = (this.atmplContainer.$mapExprList.length - 1); index > -1; index--) {
 			var mapExpr = this.atmplContainer.$mapExprList[index];
@@ -140,7 +141,7 @@ export class TemplateProcessor {
 		let result: string;
 		this.atmplContainer.$iterDecList.forEach(iterDec => {
 			if (iterDec.$mappedKey == mappedKey) {
-				result = this.tmplFunctionsProcessor.invoke(iterDec.$mappedFunction);
+				result = this.declaredIterationProcessorsMap.invoke(iterDec.$mappedProcessor);
 				return;
 			}
 		});

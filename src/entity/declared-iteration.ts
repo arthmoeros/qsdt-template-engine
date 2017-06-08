@@ -23,9 +23,9 @@ export class DeclaredIteration{
     private mappedKey: string;
 
     /**
-     * Function name to be executed for each iterated mapped expression
+     * Processor identifying name to be executed for each iterated mapped expression
      */
-    private mappedFunction: string;
+    private mappedProcessor: string;
 
     /**
      * Constructs an instance of this class with a found Declared Iteration
@@ -33,14 +33,14 @@ export class DeclaredIteration{
      */
     constructor(capturedGroups: RegExpExecArray){
         this.mappedKey = capturedGroups[2];
-        this.mappedFunction = capturedGroups[4];
+        this.mappedProcessor = capturedGroups[4];
     }
 
     public get $mappedKey(): string{
         return this.mappedKey;
     }
 
-    public get $mappedFunction(): string{
-        return this.mappedFunction;
+    public get $mappedProcessor(): string{
+        return this.mappedProcessor;
     }
 }
