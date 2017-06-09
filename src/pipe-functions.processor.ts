@@ -63,13 +63,13 @@ export class PipeFunctionsProcessor {
 			for (var index = 0; index < parameters.length; index++) {
 				var param = parameters[index].trim();
 				if(param.indexOf("'") == 0 || param.indexOf("\"") == 0){
-					param = param.substr(1,param.length-1);
+					param = param.substring(1,param.length-1);
 				}
 				parameters[index] = param;
 			}
 			return { name: name, parameters: parameters };
 		}else{
-			return { name: name };
+			return { name: func };
 		}
 	}
 }

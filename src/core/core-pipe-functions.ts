@@ -52,7 +52,7 @@ export class CorePipeFunctions {
 			return chars.concat(str);
 		}
 	};
-	private corePreffix = (str: string, prefix: string): string => {
+	private corePrefix = (str: string, prefix: string): string => {
 		if (str == "") {
 			return "";
 		} else {
@@ -110,8 +110,8 @@ export class CorePipeFunctions {
 	 * Prefixes the string with a specific character
 	 * @param str 
 	 */
-	public get preffix(): (value: string, ...args: string[]) => string {
-		return this.corePreffix;
+	public get prefix(): (value: string, ...args: string[]) => string {
+		return this.corePrefix;
 	}
 
 	/**

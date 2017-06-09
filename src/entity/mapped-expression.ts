@@ -22,7 +22,7 @@ export class MappedExpression {
 	/**
 	 * A grouped regex that structures into capture groups the representation of a normal mapped expression
 	 */
-	private static readonly groupedRegex: RegExp = /(&{)(\*)? *(\([a-zA-Z0-9_,]*?\))? *(!)?([a-zA-Z0-9_.]*?) *(\?)? *(\"[a-zA-Z0-9_. ]*?\")? *('[a-zA-Z0-9_. ]*?')? *(:)? *(\"[a-zA-Z0-9_. ]*?\")? *('[a-zA-Z0-9_. ]*?')? *(})/g;
+	private static readonly groupedRegex: RegExp = /(&{)(\*)? *(\([a-zA-Z0-9_,\[\]'" ]*?\))? *(!)?([a-zA-Z0-9_.]*?) *(\?)? *(\"[a-zA-Z0-9_. ]*?\")? *('[a-zA-Z0-9_. ]*?')? *(:)? *(\"[a-zA-Z0-9_. ]*?\")? *('[a-zA-Z0-9_. ]*?')? *(})/g;
 
 	/**
 	 * A regex with a sharp (#) prefix, which identifies it as an iterated mapped expression
@@ -33,6 +33,11 @@ export class MappedExpression {
 	 * A regex with a colon (:) prefix, which identifies it as a parameterized mapped expression
 	 */
 	private static readonly parameterizedRegex: RegExp = /(&{:)([a-zA-Z0-9_.]*?)(})/g;
+
+	/**
+	 * A regex for split of pipe functions
+	 */
+	private static readonly pipeFunctionsRegex: RegExp = /([A-Za-z0-9]*?(\[.*?\])*?)(,|$)/g;
 
 	/**
 	 * Starting index of the expression where it was found
@@ -205,7 +210,16 @@ export class MappedExpression {
 	 * @param functions string containing pipe functions to execute
 	 */
 	private parsePipeFunctions(functions: string): string[] {
-		return functions.substring(1, functions.length - 1).split(",");
+		functions = functions.substring(1, functions.length-1).trim();
+		let pipeFunctions: string[] = new Array<string>();
+		let pipeRegex: RegExp = new RegExp(MappedExpression.pipeFunctionsRegex);
+		let regexResult: RegExpExecArray = pipeRegex.exec(functions);
+		pipeFunctions.push(regexResult[1]);
+		while(pipeRegex.lastIndex < functions.length){
+			regexResult = pipeRegex.exec(functions);
+			pipeFunctions.push(regexResult[1]);
+		}
+		return pipeFunctions;
 	}
 
 	/**
