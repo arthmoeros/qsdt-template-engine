@@ -155,8 +155,12 @@ export class TemplateProcessor {
 	 * @param mapExpr Mapped Expression to which contains a ternary to evaluate
 	 */
 	private evaluateTernary(mappedValue: string, mapExpr: MappedExpression): string {
-		if(/[=|>|<]/g.test(mappedValue)){
-			let evaluationResult: boolean = eval(mappedValue);
+		if(mapExpr.$ternaryIsBooleanEvaluated){
+			if(!/\b[0-9]+\b/.test(mappedValue)) {
+				mappedValue = `'${mappedValue}'`;
+			}
+			let booleanExpr: string = mapExpr.$ternaryBooleanExpression.replace(mapExpr.$mappedKey, mappedValue);
+			let evaluationResult: boolean = eval(booleanExpr);
 			return evaluationResult ? mapExpr.$ternaryTrue : mapExpr.$ternaryFalse ? mapExpr.$ternaryFalse : "";
 		}else{
 			return mappedValue != "" ? mapExpr.$ternaryTrue : mapExpr.$ternaryFalse ? mapExpr.$ternaryFalse : ""

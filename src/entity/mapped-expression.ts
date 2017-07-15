@@ -75,6 +75,11 @@ export class MappedExpression {
 	private ternaryIsBooleanEvaluated: boolean = false;
 
 	/**
+	 * Ternary boolean expression
+	 */
+	private ternaryBooleanExpression: string;
+
+	/**
 	 * Determines if the expression is negated with a !
 	 */
 	private negated: boolean = false;
@@ -174,17 +179,19 @@ export class MappedExpression {
 		this.mappedKey = capturedGroups[5];
 		this.isTernary = capturedGroups[6] == "?";
 		if (this.isTernary) {
+			if (/[=|>|<]/g.test(this.mappedKey)) {
+				this.ternaryIsBooleanEvaluated = true;
+				this.ternaryBooleanExpression = this.mappedKey;
+				this.mappedKey = this.getMappedKeyFromBooleanExpression(this.ternaryBooleanExpression);
+			}
 			try {
-				eval(this.mappedKey);
+				eval(this.ternaryBooleanExpression);
 			} catch (error) {
 				if (error instanceof SyntaxError) {
 					let lineCol: [number, number] = StringHandlerUtil.locateLineColumnUpToIndex(foundExpr.input, foundExpr.index);
 					this.invalidExprMsg = { expr: foundExpr[0], lineNum: lineCol[0], colNum: lineCol[1], problem: "Ternary has Invalid Syntax" };
 					return;
 				}
-			}
-			if(/[=|>|<]/g.test(this.mappedKey)){
-				this.ternaryIsBooleanEvaluated = true;
 			}
 			this.ternaryTrue = capturedGroups[7];
 			if (!this.ternaryTrue) {
@@ -209,6 +216,30 @@ export class MappedExpression {
 		}
 		this.startIndex = foundExpr.index;
 		this.endIndex = this.startIndex + foundExpr[0].length;
+	}
+
+	private getMappedKeyFromBooleanExpression(booleanExpression: string): string {
+		let wordRegex: RegExp = /[A-Za-z0-9'"]+/g;
+		let matches: number = 0;
+		let matchedMappedKey: string = null;
+		let currentMatch: RegExpExecArray;
+		do {
+			currentMatch = wordRegex.exec(booleanExpression);
+			if (currentMatch != null && !/['"]/.test(currentMatch[0])
+				 && !/\b[0-9]+\b/.test(currentMatch[0]) && matchedMappedKey == null) {
+				matchedMappedKey = currentMatch[0];
+				matches++;
+			}
+		}
+		while (wordRegex.lastIndex != 0);
+		if (matches == 0) {
+			throw new Error("Ternary boolean expression is missing a mapped key for reference");
+		} else if (matches > 1) {
+			throw new Error("Ternary boolean expression has more than one mapped key, this is invalid!");
+		} else {
+			return matchedMappedKey;
+		}
+
 	}
 
 	/**
@@ -301,6 +332,10 @@ export class MappedExpression {
 
 	public get $isTernary(): boolean {
 		return this.isTernary;
+	}
+
+	public get $ternaryBooleanExpression(): string {
+		return this.ternaryBooleanExpression;
 	}
 
 	public get $ternaryIsBooleanEvaluated(): boolean {

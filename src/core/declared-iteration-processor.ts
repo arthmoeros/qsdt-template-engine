@@ -1,5 +1,3 @@
-import { Osb11gGuid } from "./osb-11g-guid";
-
 /**
  * @class DeclaredIterationProcessor
  * This class must be extended for its use with Declared Iteration functions.
@@ -14,13 +12,6 @@ import { Osb11gGuid } from "./osb-11g-guid";
  * method.
  */
 export abstract class DeclaredIterationProcessor{
-
-    /**
-     * Returns an array containing the core processors of the engine
-     */
-    public static getCoreProcessors() : DeclaredIterationProcessor[]{
-        return [new Osb11gGuid()];
-    }
 
     /**
      * This method must return an unique identifier for the declared iteration being used

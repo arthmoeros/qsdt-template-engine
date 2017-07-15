@@ -1,6 +1,7 @@
 import { Annotation } from "@artifacter/common";
 
 import { Osb11gGuid } from "./core/osb-11g-guid";
+import { NumberCounter } from "./core/number-counter";
 import { DeclaredIterationProcessor } from "./core/declared-iteration-processor";
 
 /**
@@ -26,6 +27,10 @@ export class DeclaredIterationProcessorsMap {
 		let coreOsb11gGuid: DeclaredIterationProcessor = new Osb11gGuid()
 		this.coreProcessors = {};
 		this.coreProcessors[coreOsb11gGuid.identifier()] = coreOsb11gGuid;
+		
+		let numberCounter: DeclaredIterationProcessor = new NumberCounter()
+		this.coreProcessors = {};
+		this.coreProcessors[numberCounter.identifier()] = numberCounter;
 
 		this.customProcessors = {};
 		if (customProcessors != null) {

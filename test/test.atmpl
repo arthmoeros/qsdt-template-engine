@@ -17,7 +17,7 @@
 		},
 		"ternaryBoolean": {
 			"expr": "&{ternaryTestKey == 'notTestValue' ? 'valueTrue' : 'valueFalse'}",
-			"expectedOutcome": "testValue"
+			"expectedOutcome": "valueFalse"
 		},
 		"corePipeFunctions": {
 			"expr": "&{(auc,slc)testKey}",
@@ -37,7 +37,7 @@
 	"iteratedExpressionTest": {
 		"test" : {
 			"expr" : "#iteration(counter=numberCounter)\nPRIMERO=&{#counter};SEGUNDO=&{#counter};TERCERO=&{#counter}",
-			"expectedOutcome": "PRIMERO=1;SEGUNDO=2;TERCERO=3"
+			"expectedOutcome": "PRIMERO=3;SEGUNDO=2;TERCERO=1"
 		}
 	}
 }

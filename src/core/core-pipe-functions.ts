@@ -94,7 +94,7 @@ export class CorePipeFunctions {
 	 * Starts with Lower Case
 	 */
 	public get slc(): (value: string, ...args: string[]) => string {
-		return this.coreSUC;
+		return this.coreSLC;
 	}
 
 	/**
