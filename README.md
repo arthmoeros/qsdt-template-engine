@@ -2,6 +2,62 @@
 
 ### Artifacter's template processing engine
 
+#### What's new? - New Features in 1.5
+This upgrade is mainly on the Pipe Functions and the now renamed Declared Iteration Processors (previously known as Template Functions).
+
+##### Pipe Functions Upgrade
+These now can be parameterized, the syntax now supports passing arguments to each pipe function, for example:
+```typescript
+&{(paddLeft[15,'0'],auc,prefix['_'])testKey}
+```
+
+##### Custom Pipe Functions Refactor
+Custom Pipe Functions can be passed on a CustomPipeFunctions instance, closures are added with a matching name to a TemplateProcessor, and then will be used when run, for example:
+```typescript
+let custom: CustomPipeFunctions = new CustomPipeFunctions();
+custom.addFunction("appendHelloWorld", (inputString, param1, param2) => {
+    return inputString.concat("-hello-world");
+});
+
+let tmplProcessor: TemplateProcessor = new TemplateProcessor("templateFile.atmpl", fs.readFileSync("templateFile.atmpl"), custom);
+tmplProcessor.run(testMap);
+
+// Usage
+&{(appendHelloWorld['param1','param2'])testKey}
+```
+This way, the @PipeFunction annotation is no longer required, and the typing enforces the closure to support the given paramters and return value
+
+##### Declared Iteration Processor (previously known as Template Functions)
+Now these are full fledged classes extending the abstract class DeclaredIterationProcessor, it requires to implement three methods:
+
+Method | Description
+------ | -----------
+identifier|This method must return an unique identifier for the declared iteration being used
+initialize|This method must initialize the state of the declared iteration
+nextValue|This method must return the next value in the iteration
+
+Example:
+
+```typescript
+import { DeclaredIterationProcessor } from "./declared-iteration-processor";
+
+export class NumberCounter extends DeclaredIterationProcessor{
+
+    private internalNumber: number;
+
+    public identifier(): string {
+        return "numberCounter";
+    }
+    public initialize(): void {
+        this.internalNumber = 0;
+    }
+    public nextValue(): string {
+        this.internalNumber += 1;
+        return this.internalNumber.toString();
+    }
+}
+```
+
 #### What's this? - Intro
 This is the core of the Template Engine that Artifacter uses for its artifacts generation, it makes use of the atmpl format whose syntax is explained further in this same document. This engine is made for Artifacter, but has the purpose of reusability in mind, so any other consumer can extend it a bit without modifying its core, it allows a bit further customization on its template processing via Custom Pipe Functions and Custom Template Functions. For now they have very basic support, but there are plans on widening the customization scope of these.
 
@@ -87,15 +143,9 @@ For now my goal was to get a better handle at Node.JS API and the whole scene, s
 
 So, if you have any suggestion for new features, I will gladly hear you out along with a simple use case, this has been a really nice experience for me and very refreshing after working almost a whole year setting up only proxy services on Oracle Service Bus at my work.
 
-Although I still have some new features to be implemented that I've got on my mind, here they are, some could be for a short 1.1~1.5 and some could be very big for like a 2.0 (like sub-templates and sub-maps)
-
 Feature on mind | Why? | Desired target version
 ----------------|------|-----------------------
-Send callback concrete factory function for custom template functions to processor | Allows multiple processor runs with multiple custom template function instances with a single template, it also would keep away a developer from not creating a new instance when creating a new processor, leading to unexpected behavior | 1.1~1.5
-Upgrade ternary operator to actually evaluate a condition | Allows more options when creating a mapped expression with a ternary operator | 1.1~1.5
-Upgrade custom pipe functions to allow parameter passing | Allows wider custom pipe functions reusability, implies a tiny syntax upgrade | 1.5
-Upgrade custom template functions to allow parameter passing | Don't know really, it could improve reusability of template functions, but the idea doesn't convince me yet | 1.5
-Implement sub-templates and sub-maps | It would increase the range of options to artifact generation, but this implies a great syntax upgrade, a massive tweaking of the entire engine and giant overhaul of @artefacter/ui | 2.0
+Implement sub-templates and use a JSON instead of a Map<string,string> | It would increase the range of options to artifact generation, but this implies a great syntax upgrade, a massive tweaking of the entire engine and giant overhaul of @artefacter/ui | 2.0
 
 ### Could I get some help with atmpl syntax? - Visual Studio Code Extension
 

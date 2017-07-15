@@ -1,6 +1,7 @@
 import * as fs from "fs";
 
 import { TemplateProcessor } from "./../src/template.processor";
+import { CustomPipeFunctions } from "./../src/core/custom-pipe-functions";
 
 let tests: any = JSON.parse(fs.readFileSync(__dirname+"/test.atmpl").toString());
 
@@ -42,4 +43,13 @@ if (outcome2 == tests.iteratedExpressionTest.test.expectedOutcome) {
 } else {
     console.log("Test is UNSUCCESSFUL: outcome vs expected -> " + outcome2 + " VS " + tests.iteratedExpressionTest.test.expectedOutcome);
 }
+
+let custom: CustomPipeFunctions = new CustomPipeFunctions();
+custom.addFunction("appendHelloWorld", (inputString) => {
+    return inputString.concat("-hello-world");
+});
+
+let tmplProcessor: TemplateProcessor = new TemplateProcessor("templateFile.atmpl", fs.readFileSync("templateFile.atmpl"), custom);
+tmplProcessor.run(testMap);
+
 
