@@ -118,7 +118,7 @@ export class TemplateProcessor {
 					workingResult.replaceRange(mapExpr.$startIndex, mapExpr.$endIndex, "");
 				} else {
 					if (mapExpr.$isTernary) {
-						mappedValue = mappedValue != "" ? mapExpr.$ternaryTrue : mapExpr.$ternaryFalse ? mapExpr.$ternaryFalse : "";
+						mappedValue = this.evaluateTernary(mappedValue, mapExpr);
 					}
 					if (mapExpr.$pipeFunctions && mapExpr.$pipeFunctions.length > 0) {
 						mappedValue = this.pipeFunctionsProcessor.invoke(mapExpr.$pipeFunctions, mappedValue);
@@ -149,6 +149,21 @@ export class TemplateProcessor {
 	}
 
 	/**
+	 * Evaluates a ternary within a mapped expression, it determines if the ternary is a
+	 * boolean expression or just a check of a not empty string
+	 * @param mappedValue Mapped Value found
+	 * @param mapExpr Mapped Expression to which contains a ternary to evaluate
+	 */
+	private evaluateTernary(mappedValue: string, mapExpr: MappedExpression): string {
+		if(/[=|>|<]/g.test(mappedValue)){
+			let evaluationResult: boolean = eval(mappedValue);
+			return evaluationResult ? mapExpr.$ternaryTrue : mapExpr.$ternaryFalse ? mapExpr.$ternaryFalse : "";
+		}else{
+			return mappedValue != "" ? mapExpr.$ternaryTrue : mapExpr.$ternaryFalse ? mapExpr.$ternaryFalse : ""
+		}
+	}
+
+	/**
 	 * Utility static method for boolean evaluation of a single MappedExpression with a corresponding map.
 	 * It will return true only if the value found from the mappedKey and is "true" or "1", otherwise
 	 * it returns false
@@ -162,6 +177,9 @@ export class TemplateProcessor {
 			throw new Error("Invalid expression '" + expression + "' found trying to evaluate a boolean");
 		}
 		let expr: MappedExpression = new MappedExpression(result);
+		if(expr.$isTernary){
+			throw new Error("Mapped expression has a ternary, this method cannot be used with it");
+		}
 		let value: any = map.get(expr.$mappedKey);
 		if (value != null) {
 			if (typeof (value) == "boolean") {

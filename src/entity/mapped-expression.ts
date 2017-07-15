@@ -22,7 +22,12 @@ export class MappedExpression {
 	/**
 	 * A grouped regex that structures into capture groups the representation of a normal mapped expression
 	 */
-	private static readonly groupedRegex: RegExp = /(&{)(\*)? *(\([a-zA-Z0-9_,\[\]'" ]*?\))? *(!)?([a-zA-Z0-9_.]*?) *(\?)? *(\"[a-zA-Z0-9_. ]*?\")? *('[a-zA-Z0-9_. ]*?')? *(:)? *(\"[a-zA-Z0-9_. ]*?\")? *('[a-zA-Z0-9_. ]*?')? *(})/g;
+	private static readonly groupedRegex: RegExp = /(&{)(\*)? *(\([a-zA-Z0-9_,\[\]'" ]*?\))? *(!)?([a-zA-Z0-9_.'" ]*?[=!<>]*?[a-zA-Z0-9_.'" ]*?) *(\?)? *(\"[a-zA-Z0-9_. ]*?\")? *('[a-zA-Z0-9_. ]*?')? *(:)? *(\"[a-zA-Z0-9_. ]*?\")? *('[a-zA-Z0-9_. ]*?')? *(})/g;
+
+	/**
+	 * regex for valid mappedKey (not ternary)
+	 */
+	private static readonly validMappedKey: RegExp = /[a-zA-Z0-9.]*?/g
 
 	/**
 	 * A regex with a sharp (#) prefix, which identifies it as an iterated mapped expression
@@ -164,6 +169,15 @@ export class MappedExpression {
 		this.mappedKey = capturedGroups[5];
 		this.isTernary = capturedGroups[6] == "?";
 		if (this.isTernary) {
+			try {
+				eval(this.mappedKey);
+			} catch (error) {
+				if (error instanceof SyntaxError) {
+					let lineCol: [number, number] = StringHandlerUtil.locateLineColumnUpToIndex(foundExpr.input, foundExpr.index);
+					this.invalidExprMsg = { expr: foundExpr[0], lineNum: lineCol[0], colNum: lineCol[1], problem: "Ternary has Invalid Syntax" };
+					return;
+				}
+			}
 			this.ternaryTrue = capturedGroups[7];
 			if (!this.ternaryTrue) {
 				this.ternaryTrue = capturedGroups[8];
@@ -177,6 +191,12 @@ export class MappedExpression {
 			}
 			if (this.ternaryFalse) {
 				this.ternaryFalse = this.ternaryFalse.substring(1, this.ternaryFalse.length - 1);
+			}
+		} else {
+			if (!new RegExp(MappedExpression.validMappedKey).test(this.mappedKey)) {
+				let lineCol: [number, number] = StringHandlerUtil.locateLineColumnUpToIndex(foundExpr.input, foundExpr.index);
+				this.invalidExprMsg = { expr: foundExpr[0], lineNum: lineCol[0], colNum: lineCol[1], problem: "Mapped Key has invalid format" };
+				return;
 			}
 		}
 		this.startIndex = foundExpr.index;
@@ -210,12 +230,12 @@ export class MappedExpression {
 	 * @param functions string containing pipe functions to execute
 	 */
 	private parsePipeFunctions(functions: string): string[] {
-		functions = functions.substring(1, functions.length-1).trim();
+		functions = functions.substring(1, functions.length - 1).trim();
 		let pipeFunctions: string[] = new Array<string>();
 		let pipeRegex: RegExp = new RegExp(MappedExpression.pipeFunctionsRegex);
 		let regexResult: RegExpExecArray = pipeRegex.exec(functions);
 		pipeFunctions.push(regexResult[1]);
-		while(pipeRegex.lastIndex < functions.length){
+		while (pipeRegex.lastIndex < functions.length) {
 			regexResult = pipeRegex.exec(functions);
 			pipeFunctions.push(regexResult[1]);
 		}
