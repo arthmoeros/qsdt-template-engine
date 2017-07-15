@@ -27,7 +27,7 @@ export class MappedExpression {
 	/**
 	 * regex for valid mappedKey (not ternary)
 	 */
-	private static readonly validMappedKey: RegExp = /[a-zA-Z0-9.]*?/g
+	private static readonly validMappedKey: RegExp = /[a-zA-Z0-9.]+/g
 
 	/**
 	 * A regex with a sharp (#) prefix, which identifies it as an iterated mapped expression
@@ -68,6 +68,11 @@ export class MappedExpression {
 	 * Determines if the expression is a ternary evaluated one
 	 */
 	private isTernary: boolean = false;
+
+	/**
+	 * Determines if ternary is boolean evaluated
+	 */
+	private ternaryIsBooleanEvaluated: boolean = false;
 
 	/**
 	 * Determines if the expression is negated with a !
@@ -177,6 +182,9 @@ export class MappedExpression {
 					this.invalidExprMsg = { expr: foundExpr[0], lineNum: lineCol[0], colNum: lineCol[1], problem: "Ternary has Invalid Syntax" };
 					return;
 				}
+			}
+			if(/[=|>|<]/g.test(this.mappedKey)){
+				this.ternaryIsBooleanEvaluated = true;
 			}
 			this.ternaryTrue = capturedGroups[7];
 			if (!this.ternaryTrue) {
@@ -293,6 +301,10 @@ export class MappedExpression {
 
 	public get $isTernary(): boolean {
 		return this.isTernary;
+	}
+
+	public get $ternaryIsBooleanEvaluated(): boolean {
+		return this.ternaryIsBooleanEvaluated;
 	}
 
 	public get $ternaryTrue(): string {

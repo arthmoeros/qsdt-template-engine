@@ -1,7 +1,43 @@
-<div>
-	<div>&{a}</div>
-	<div>&{(func1)b}</div>
-	<div>&{c?"pepito"}</div>
-	<div>&{d?"jorgito":"juanito"}</div>
-	<div>&{(func1,func2)e}</div>
-</div>
+{
+	"testMap": {
+		"testKey": "testValue",
+		"ternaryTestKey": "ternaryTestValue"
+	},
+	"testParameters": {
+		"testParameterKey": "parameterTestValue"
+	},
+	"mappedExpressionTest": {
+		"singleExpression": {
+			"expr": "&{testKey}",
+			"expectedOutcome": "testValue"
+		},
+		"ternaryString": {
+			"expr": "&{ternaryTestKey ? 'valueTrue' : 'valueFalse'}",
+			"expectedOutcome": "valueTrue"
+		},
+		"ternaryBoolean": {
+			"expr": "&{ternaryTestKey == 'notTestValue' ? 'valueTrue' : 'valueFalse'}",
+			"expectedOutcome": "testValue"
+		},
+		"corePipeFunctions": {
+			"expr": "&{(auc,slc)testKey}",
+			"expectedOutcome": "tESTVALUE"
+		},
+		"paramCorePipeFunction": {
+			"expr": "&{(paddLeft[15,'0'],auc,prefix['_'])testKey}",
+			"expectedOutcome": "_000000TESTVALUE"
+		}
+	},
+	"parameterizedExpressionTest": {
+		"test" : {
+			"expr" : "&{:testParameterKey}",
+			"expectedOutcome": "parameterTestValue"
+		}
+	},
+	"iteratedExpressionTest": {
+		"test" : {
+			"expr" : "#iteration(counter=numberCounter)\nPRIMERO=&{#counter};SEGUNDO=&{#counter};TERCERO=&{#counter}",
+			"expectedOutcome": "PRIMERO=1;SEGUNDO=2;TERCERO=3"
+		}
+	}
+}
