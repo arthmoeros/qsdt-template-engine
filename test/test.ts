@@ -44,12 +44,5 @@ if (outcome2 == tests.iteratedExpressionTest.test.expectedOutcome) {
     console.log("Test is UNSUCCESSFUL: outcome vs expected -> " + outcome2 + " VS " + tests.iteratedExpressionTest.test.expectedOutcome);
 }
 
-let custom: CustomPipeFunctions = new CustomPipeFunctions();
-custom.addFunction("appendHelloWorld", (inputString) => {
-    return inputString.concat("-hello-world");
-});
-
-let tmplProcessor: TemplateProcessor = new TemplateProcessor("templateFile.atmpl", fs.readFileSync("templateFile.atmpl"), custom);
-tmplProcessor.run(testMap);
 
 
