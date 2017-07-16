@@ -4,32 +4,11 @@
 
 #### What's new? - New Features in 1.5
 - Pipe Functions Upgrade
--- Supports parameter passing
--- Custom Pipe Functions Refactoring
+    - Supports parameter passing
+    - Custom Pipe Functions Refactoring
 - Declared Iteration Processors (Template Functions upgrade)
 - Ternary operators now can evaluate a boolean
 - Parameterized Expressions
-
-##### Pipe Functions Upgrade
-
-
-##### Custom Pipe Functions Refactor
-Custom Pipe Functions can be passed on a CustomPipeFunctions instance, closures are added with a matching name to a TemplateProcessor, and then will be used when run, for example:
-```typescript
-let custom: CustomPipeFunctions = new CustomPipeFunctions();
-custom.addFunction("appendHelloWorld", (inputString, param1, param2) => {
-    return inputString.concat("-hello-world");
-});
-
-let tmplProcessor: TemplateProcessor = new TemplateProcessor("templateFile.atmpl", fs.readFileSync("templateFile.atmpl"), custom);
-tmplProcessor.run(testMap);
-
-// Usage
-&{(appendHelloWorld['param1','param2'])testKey}
-```
-This way, the @PipeFunction annotation is no longer required, and the typing enforces the closure to support the given paramters and return value
-
-##### 
 
 #### What's this? - Intro
 This is the core of the Template Engine that Artifacter uses for its artifacts generation, it makes use of the atmpl format whose syntax is explained further in this same document. This engine is made for Artifacter, but has the purpose of reusability in mind, so any other consumer can extend it a bit without modifying its core, it allows a bit further customization on its template processing via Custom Pipe Functions and Declared Iteration Processors.
