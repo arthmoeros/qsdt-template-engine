@@ -66,7 +66,7 @@ tmplProcessor.run(testMap);
 // Usage
 &{(appendHelloWorld['param1','param2'])testKey}
 ```
-The typing in the __addFunction__ method enforces the closure to support the given paramters and return value > (string, string...) : string
+The typing in the __addFunction__ method enforces the closure to support the given parameters and return value > (string, string...) : string
 
 ###### Ternary Operator
 This operator changes the expression replacement behavior, if the mapped key results in a value, it will be checked by the engine if it is a empty string or not, depending on this the expression will be replaced by the first resulting value defined or the second. The first value is required in the expression only if a ternary operator is declared, the second isn't required. If a second value is not declared and the found value is empty, the replacement will be done with an empty string.
@@ -78,7 +78,7 @@ A boolean evaluation can also be used:
 ```
 
 ##### Declared Iteration & Iterated Expression
-Iteration in the atmpl syntax can be used to put iterated values on each template, for this to work, an Iteration must be declared on a single line indicating its iteration key for reference and a template function to execute for each finding of an iterated expression, which contains only the iteration key reference. In this case there is no pre-processing of the value like a mapped expression. Iterated expressions must have a corresponding Declared Iteration written in the template, if a "orphan" Iterated Expression is found, the engine will raise an error, in the other hand Declared Iterations can be on their own, as they are harmless and are deleted anyway on the final stage of the template processing. Now, let's talk about syntax:
+Iteration in the atmpl syntax can be used to put iterated values on each template, for this to work, an Iteration must be declared on a single line indicating its iteration key for reference and a Declared Iteration Processor identifier to execute for each finding of an iterated expression, which contains only the iteration key reference. In this case there is no pre-processing of the value like a mapped expression. Iterated expressions must have a corresponding Declared Iteration written in the template, if a "orphan" Iterated Expression is found, the engine will raise an error, in the other hand Declared Iterations can be on their own, as they are harmless and are deleted anyway on the final stage of the template processing. Now, let's talk about syntax:
 
 ```typescript
 // Declared Iteration
