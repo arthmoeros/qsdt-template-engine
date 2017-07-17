@@ -1,5 +1,8 @@
 import { StringContainer } from "@artifacter/common";
 
+import { SubTemplate } from "./entity/sub-template";
+import { ObjectPropertyLocator } from "./locator/object-property-locator";
+import { TemplateScanner, ElementMatch } from "./core/template-scanner";
 import { MappedExpression } from "./entity/mapped-expression";
 import { DeclaredIteration } from "./entity/declared-iteration";
 import { TemplateContainer } from "./container/template.container";
@@ -22,9 +25,24 @@ const subTmplReged = new RegExp(/(::)*([a-zA-Z0-9_./]*?)*(::)/g);
 export class TemplateProcessor {
 
 	/**
-	 * Associated TemplateContainer
+	 * Template contents
 	 */
-	private atmplContainer: TemplateContainer;
+	private templateContents: string;
+
+	/**
+	 * Global Input Object
+	 */
+	private globalInput: {};
+
+	/**
+	 * ForEach iteration input object
+	 */
+	private foreachInput: {};
+
+	/**
+	 * Found declared iterations
+	 */
+	private declaredIterations: DeclaredIteration[] = [];
 
 	/**
 	 * Added template parameters for parameterized expressions
@@ -42,29 +60,64 @@ export class TemplateProcessor {
 	private declaredIterationProcessorsMap: DeclaredIterationProcessorsMap;
 
 	/**
+	 * Optionality by default flag
+	 */
+	private optionalityByDefault: boolean;
+
+	/**
+	 * Parent processor if this is a nested one
+	 */
+	private parentProcessor: TemplateProcessor;
+
+	/**
+	 * This processed template's name
+	 */
+	private templateName: string;
+
+	/**
 	 * Constructs a Template Processor with an anonymous template
 	 * @param stringTmpl string containing template contents
 	 * @param optionalityByDefault makes all mapped expressions optional by default
 	 */
-	constructor(stringTmpl: string, optionalityByDefault?: boolean);
+	constructor(templateName: string, stringTmpl: string, optionalityByDefault?: boolean);
 
 	/**
 	 * Construct a Templater Processor with an atmpl file and optional custom pipe functions and custom template functions
 	 * @param fileName atmpl file name
 	 * @param fileBuffer atmpl Buffer with atmpl contents
 	 * @param customPipeFunctions Custom Pipe Functions to use, it must contain methods annotated with @PipeFunction
-	 * @param declaredIterationProcessors Custom Template Functions to use, it must contain methods annotated with @TemplateFunction
+	 * @param declaredIterationProcessors Custom Declared Iteration Processors to use, these must extend the class DeclaredIterationProcessor
 	 */
-	constructor(fileName: string, fileBuffer: Buffer, customPipeFunctions?: CustomPipeFunctions, declaredIterationProcessors?: DeclaredIterationProcessor[]);
+	constructor(fileName: string, fileBuffer: Buffer, optionalityByDefault?: boolean, customPipeFunctions?: CustomPipeFunctions, declaredIterationProcessors?: DeclaredIterationProcessor[]);
 
-	constructor(param1: string, param2: Buffer | boolean, customPipeFunctions?: CustomPipeFunctions, declaredIterationProcessors?: DeclaredIterationProcessor[]) {
-		if (param2 instanceof Buffer) {
-			this.atmplContainer = new TemplateContainer(param1, param2);
-		} else {
-			this.atmplContainer = new TemplateContainer(param1, param2);
+	constructor(parentProcessor: TemplateProcessor, nestedContents: string);
+
+	constructor(param1: string | TemplateProcessor, param2: Buffer | string, param3?: boolean, param4?: CustomPipeFunctions, param5?: DeclaredIterationProcessor[]) {
+		if (param1 instanceof TemplateProcessor && typeof (param2) == "string") {
+			this.parentProcessor = param1;
+			this.templateName = param1.templateName;
+			this.globalInput = param1.globalInput;
+			this.declaredIterationProcessorsMap = param1.declaredIterationProcessorsMap;
+			this.declaredIterations = param1.declaredIterations;
+			this.optionalityByDefault = param1.optionalityByDefault;
+			this.pipeFunctionsProcessor = param1.pipeFunctionsProcessor;
+			this.templateParameters = param1.templateParameters;
+			this.templateContents = param2;
+		} else if (typeof (param1) == "string") {
+			if (param1 == null) {
+				this.templateName = "(anonymous template)";
+			} else {
+				this.templateName = param1;
+			}
+			if (param2 instanceof Buffer) {
+				this.templateContents = param2.toString();
+			} else if (typeof (param2) == "string") {
+				this.templateContents = param2;
+			}
+			this.optionalityByDefault = param3;
+			this.pipeFunctionsProcessor = new PipeFunctionsProcessor(param4);
+			this.declaredIterationProcessorsMap = new DeclaredIterationProcessorsMap(param5);
 		}
-		this.pipeFunctionsProcessor = new PipeFunctionsProcessor(customPipeFunctions);
-		this.declaredIterationProcessorsMap = new DeclaredIterationProcessorsMap(declaredIterationProcessors);
 	}
 
 	/**
@@ -85,66 +138,194 @@ export class TemplateProcessor {
 	 * 
 	 * @param map map containing the data to put into mapped expressions
 	 */
-	public run(map: Map<string, string>): string {
-		if (this.atmplContainer.$skip) {
-			return this.atmplContainer.$fileContents;
+	public run(input: {}, parentInput?: {}): string {
+		if (this.parentProcessor != null && parentInput == null) {
+			throw new Error("This is a nested processor but no parent input was provided");
 		}
-		if (this.atmplContainer.$invalid) {
-			throw new Error(TemplateContainer.msgTmplInvalid);
-		}
-		if (map.size == 0) {
-			throw new Error("Invalid Values Map: map is empty");
-		}
+		let workingResult: StringContainer = new StringContainer(this.templateContents);
 		this.declaredIterationProcessorsMap.initializeProcessors();
-		let workingResult: StringContainer = new StringContainer(this.atmplContainer.$fileContents);
-		for (var index = (this.atmplContainer.$mapExprList.length - 1); index > -1; index--) {
-			var mapExpr = this.atmplContainer.$mapExprList[index];
-			if (mapExpr.$isIterated) {
-				workingResult.replaceRange(mapExpr.$startIndex, mapExpr.$endIndex, this.retrieveValueFromIterDec(mapExpr.$mappedKey));;
-			} else if (mapExpr.$isParameterized) {
-				if (this.templateParameters == null) {
-					throw new Error("Invalid Processor state: found Parameterized Expression, but no template parameters are set");
-				} else if (this.templateParameters[mapExpr.$mappedKey] == null) {
-					console.warn("Expected parameter name '" + mapExpr.$mappedKey + "', but provided template parameters doesn't have a value associated with it, expect an invalid generated artifact from template located in '" + this.atmplContainer.$filename + "'");
-				} else {
-					let paramProcessor: TemplateProcessor = new TemplateProcessor(this.templateParameters[mapExpr.$mappedKey], true);
-					workingResult.replaceRange(mapExpr.$startIndex, mapExpr.$endIndex, paramProcessor.run(map));
-				}
+
+		let scanner: TemplateScanner = new TemplateScanner(this.templateContents);
+		let matches: ElementMatch[] = scanner.run();
+		while (true) {
+			let currentMatch: ElementMatch = matches.shift();
+			if (currentMatch == null) {
+				break;
 			} else {
-				let mappedValue: string = map.get(mapExpr.$mappedKey);
-				if (mappedValue == undefined && !mapExpr.$isOptional && !this.atmplContainer.$optionalityByDefault) {
-					console.warn("Expected key '" + mapExpr.$mappedKey + "', but provided map doesn't have a value associated with it, expect an invalid generated artifact from template located in '" + this.atmplContainer.$filename + "' or maybe you should set the Mapped Expression as optional");
-				} else if (mappedValue == undefined && (mapExpr.$isOptional || this.atmplContainer.$optionalityByDefault)) {
-					workingResult.replaceRange(mapExpr.$startIndex, mapExpr.$endIndex, "");
-				} else {
-					if (mapExpr.$isTernary) {
-						mappedValue = this.evaluateTernary(mappedValue, mapExpr);
-					}
-					if (mapExpr.$pipeFunctions && mapExpr.$pipeFunctions.length > 0) {
-						mappedValue = this.pipeFunctionsProcessor.invoke(mapExpr.$pipeFunctions, mappedValue);
-					}
-					workingResult.replaceRange(mapExpr.$startIndex, mapExpr.$endIndex, mappedValue);
-				}
+				this.processMatch(currentMatch, matches, workingResult, input, parentInput);
 			}
 		}
+
+		// remove all declared iterations from the result
 		let iterDecRegex: RegExp = new RegExp(DeclaredIteration.regex);
 		workingResult.replace(iterDecRegex, "");
 
+		// TODO: remove all foreachs and if blocks
+
 		return workingResult.toString();
 	}
+
+	private processMatch(currentMatch: ElementMatch, matches: ElementMatch[], workingResult: StringContainer, input: {}, parentInput?: {}) {
+		if (currentMatch.type == "mappedExpression") {
+			this.processMappedExpression(currentMatch.regex, workingResult, input, parentInput);
+		} else if (currentMatch.type == "declaredIteration") {
+			this.processDeclaredIteration(currentMatch.regex);
+		} else if (currentMatch.type == "forEachBlock") {
+			this.processForEachBlock(currentMatch.regex, matches, workingResult, input, parentInput);
+		} else if (currentMatch.type == "ifBlock") {
+			this.processIfBlock(currentMatch.regex, matches, workingResult, input, parentInput);
+		}
+	}
+
+	private processForEachBlock(regexec: RegExpExecArray, matches: ElementMatch[], workingResult: StringContainer, input: {}, parentInput?: {}) {
+		let expr: RegExpExecArray = SubTemplate.validSyntaxForeach.exec(regexec[2]);
+		if (expr == null) {
+			throw new Error(`ForEach block has invalid syntax, found: ${regexec[0]}`);
+		}
+		let iteratedName: string = expr[1];
+		let listName: string = expr[3];
+
+		let list: any[] = ObjectPropertyLocator.lookup(input, listName);
+		if(parentInput != null && list == null){
+			list = ObjectPropertyLocator.lookup(parentInput, listName);
+		}
+		if(list == null){
+			throw new Error(`Array named ${listName} wasn't found on input, neither in parentInput (if any)`);
+		}
+
+		let startIndex: number = regexec.index+regexec.length;
+		let endIndex: number = null;
+
+		let nestedForEachBlocksFound: number = 0;
+		while (true) {
+			let currentMatch: ElementMatch = matches.shift();
+			if (currentMatch == null) {
+				throw new Error("Reached the end of matches and didn't find the closing ForEach block");
+			}
+			if (currentMatch.type == "forEachBlock") {
+				nestedForEachBlocksFound++;
+			}
+			if (currentMatch.type == "forEachBlockEnd") {
+				if (nestedForEachBlocksFound > 0) {
+					nestedForEachBlocksFound--;
+				} else {
+					endIndex = currentMatch.regex.index;
+					break;
+				}
+			}
+		}
+		let subTemplate: string = workingResult.toString().substring(startIndex,endIndex);
+		let replacementString: StringContainer = new StringContainer();
+		list.forEach((item) => {
+			let childProcessor: TemplateProcessor = new TemplateProcessor(this, subTemplate);
+			if(parentInput != null){
+				parentInput[iteratedName] = item;
+			}else{
+				input[iteratedName] = item;
+			}
+			replacementString.append(childProcessor.run(item, parentInput != null ? parentInput : input));
+		})
+		let offset: number = workingResult.$offset;
+		workingResult.replaceRange(startIndex + offset, endIndex + offset, replacementString.toString());
+		workingResult.$offset += (endIndex - startIndex) - replacementString.toString().length;
+	}
+
+	private processIfBlock(regexec: RegExpExecArray, matches: ElementMatch[], workingResult: StringContainer, input: {}, parentInput?: {}) {
+		let expr: string = regexec[2];
+		if (!SubTemplate.validSyntaxIf.test(expr)) {
+			throw new Error(`If block has invalid syntax, found: ${regexec[0]}`);
+		}
+		let startIndex: number = regexec.index;
+		let endIndex: number = null;
+		let foundValue: any = ObjectPropertyLocator.lookup(input, expr);
+		if (foundValue == null) {
+			let nestedIfBlocksFound: number = 0;
+			while (true) {
+				let currentMatch: ElementMatch = matches.shift();
+				if (currentMatch == null) {
+					throw new Error("Reached the end of matches and didn't find the closing If block");
+				}
+				if (currentMatch.type == "ifBlock") {
+					nestedIfBlocksFound++;
+				}
+				if (currentMatch.type == "ifBlockEnd") {
+					if (nestedIfBlocksFound > 0) {
+						nestedIfBlocksFound--;
+					} else {
+						endIndex = currentMatch.regex.index + currentMatch.regex.length;
+						break;
+					}
+				}
+			}
+			let offset: number = workingResult.$offset;
+			workingResult.replaceRange(startIndex + offset, endIndex + offset, "");
+			workingResult.$offset += (endIndex - startIndex) - 0;
+		}
+	}
+
+	private processDeclaredIteration(regexec: RegExpExecArray) {
+		let decIter: DeclaredIteration = new DeclaredIteration(regexec);
+		this.declaredIterations.push(decIter);
+	}
+
+	private processMappedExpression(regexec: RegExpExecArray, workingResult: StringContainer, input: {}, parentInput?: {}) {
+		let mapExpr: MappedExpression = new MappedExpression(regexec);
+		if (mapExpr.$invalidExprMsg != null) {
+			throw new Error("Invalid Expression found: " + JSON.stringify(mapExpr.$invalidExprMsg));
+		}
+		let offset: number = workingResult.$offset;
+		if (mapExpr.$isIterated) {
+			let replacementString: string = this.retrieveValueFromIterDec(mapExpr.$mappedKey);
+			workingResult.replaceRange(mapExpr.$startIndex + offset, mapExpr.$endIndex + offset, replacementString);
+			workingResult.$offset += regexec[0].length - replacementString.length;
+		} else if (mapExpr.$isParameterized) {
+			if (this.templateParameters == null) {
+				throw new Error("Invalid Processor state: found Parameterized Expression, but no template parameters are set");
+			} else if (this.templateParameters[mapExpr.$mappedKey] == null) {
+				console.warn("Expected parameter name '" + mapExpr.$mappedKey + "', but provided template parameters doesn't have a value associated with it, expect an invalid generated artifact from template located in '" + this.templateName + "'");
+			} else {
+				let paramProcessor: TemplateProcessor = new TemplateProcessor("(Parameterized)", this.templateParameters[mapExpr.$mappedKey], true);
+				let replacementString: string = paramProcessor.run(input);
+				workingResult.replaceRange(mapExpr.$startIndex + offset, mapExpr.$endIndex + offset, replacementString);
+				workingResult.$offset += regexec[0].length - replacementString.length;
+			}
+		} else {
+			let mappedValue: string = ObjectPropertyLocator.lookup(input, mapExpr.$mappedKey);
+			if (mappedValue == undefined && !mapExpr.$isOptional && !this.optionalityByDefault) {
+				console.warn("Expected key '" + mapExpr.$mappedKey + "', but provided map doesn't have a value associated with it, expect an invalid generated artifact from template located in '" + this.templateName + "' or maybe you should set the Mapped Expression as optional");
+			} else if (mappedValue == undefined && (mapExpr.$isOptional || this.optionalityByDefault)) {
+				workingResult.replaceRange(mapExpr.$startIndex + offset, mapExpr.$endIndex + offset, "");
+				workingResult.$offset += regexec[0].length - 0;
+			} else {
+				if (mapExpr.$isTernary) {
+					mappedValue = this.evaluateTernary(mappedValue, mapExpr);
+				}
+				if (mapExpr.$pipeFunctions && mapExpr.$pipeFunctions.length > 0) {
+					mappedValue = this.pipeFunctionsProcessor.invoke(mapExpr.$pipeFunctions, mappedValue);
+				}
+				workingResult.replaceRange(mapExpr.$startIndex + offset, mapExpr.$endIndex + offset, mappedValue);
+				workingResult.$offset += regexec[0].length - mappedValue.length;
+			}
+		}
+	}
+
+
 
 	/**
 	 * Invokes the associated mapped function with the iterated mapped expression
 	 * @param mappedKey iterated mapped expression's mappedKey to process with Declared Iteration
 	 */
 	private retrieveValueFromIterDec(mappedKey: string): string {
-		let result: string;
-		this.atmplContainer.$iterDecList.forEach(iterDec => {
+		let result: string = null;
+		this.declaredIterations.forEach(iterDec => {
 			if (iterDec.$mappedKey == mappedKey) {
 				result = this.declaredIterationProcessorsMap.invoke(iterDec.$mappedProcessor);
 				return;
 			}
 		});
+		if (result == null) {
+			throw new Error(`Iterated mapped expression references a declared iteration key '${mappedKey}' but no declared iteration is defined with this key.`);
+		}
 		return result;
 	}
 
@@ -155,14 +336,14 @@ export class TemplateProcessor {
 	 * @param mapExpr Mapped Expression to which contains a ternary to evaluate
 	 */
 	private evaluateTernary(mappedValue: string, mapExpr: MappedExpression): string {
-		if(mapExpr.$ternaryIsBooleanEvaluated){
-			if(!/\b[0-9]+\b/.test(mappedValue)) {
+		if (mapExpr.$ternaryIsBooleanEvaluated) {
+			if (!/\b[0-9]+\b/.test(mappedValue)) {
 				mappedValue = `'${mappedValue}'`;
 			}
 			let booleanExpr: string = mapExpr.$ternaryBooleanExpression.replace(mapExpr.$mappedKey, mappedValue);
 			let evaluationResult: boolean = eval(booleanExpr);
 			return evaluationResult ? mapExpr.$ternaryTrue : mapExpr.$ternaryFalse ? mapExpr.$ternaryFalse : "";
-		}else{
+		} else {
 			return mappedValue != "" ? mapExpr.$ternaryTrue : mapExpr.$ternaryFalse ? mapExpr.$ternaryFalse : ""
 		}
 	}
@@ -181,7 +362,7 @@ export class TemplateProcessor {
 			throw new Error("Invalid expression '" + expression + "' found trying to evaluate a boolean");
 		}
 		let expr: MappedExpression = new MappedExpression(result);
-		if(expr.$isTernary){
+		if (expr.$isTernary) {
 			throw new Error("Mapped expression has a ternary, this method cannot be used with it");
 		}
 		let value: any = map.get(expr.$mappedKey);

@@ -13,7 +13,7 @@ export class ObjectPropertyLocator {
      * @param path Path to lookup in the object must follow the format root.parent.children
      * @throws an Error if the path points to a member of an array
      */
-    public static lookup(object: any, path: string): any {
+    public static lookup(object: {}, path: string): any {
         let nesting: string[] = path.split(".");
         let resolvedValue: any = null;
         let nextChild: any = object;

@@ -4,86 +4,101 @@ import { SubTemplate } from "./../entity/sub-template";
 
 export class TemplateScanner {
 
-    private fileName: string;
-    private fileContents: string;
+    private contents: string;
 
-    private currentIndex: number;
     private declaredIterationMatcher: RegExp;
     private mappedExpressionMatcher: RegExp;
-    private subtemplateForEachMatcher: RegExp;
-    private subtemplateIfMatcher: RegExp;
+    private subtemplateForEachStartMatcher: RegExp;
     private subtemplateForEachEndMatcher: RegExp;
+    private subtemplateIfStartMatcher: RegExp;
     private subtemplateIfEndMatcher: RegExp;
 
-    private matches: RegexMatch[];
+    private declaredIterationMatchDone: boolean = false;
+    private mappedExpressionMatchDone: boolean = false;
+    private subtemplateForEachStartMatchDone: boolean = false;
+    private subtemplateIfStartMatchDone: boolean = false;
+    private subtemplateForEachEndMatchDone: boolean = false;
+    private subtemplateIfEndMatchDone: boolean = false;
 
-    private declaredIterations: DeclaredIteration[];
-    private mappedExpressions: MappedExpression[];
-    private subTemplates: SubTemplate[];
+    private matches: ElementMatch[];
 
-    constructor(fileName: string, fileContents: string) {
-        this.currentIndex = 0;
-        this.fileContents = fileContents;
-        this.fileName = fileName;
+    constructor(contents: string) {
+        this.contents = contents;
 
         this.mappedExpressionMatcher = new RegExp(MappedExpression.regex);
         this.declaredIterationMatcher = new RegExp(DeclaredIteration.regex);
-        this.subtemplateForEachMatcher = new RegExp(SubTemplate.regexForEachStart);
-        this.subtemplateIfMatcher = new RegExp(SubTemplate.regexIfStart);
+        this.subtemplateForEachStartMatcher = new RegExp(SubTemplate.regexForEachStart);
         this.subtemplateForEachEndMatcher = new RegExp(SubTemplate.regexForEachEnd);
+        this.subtemplateIfStartMatcher = new RegExp(SubTemplate.regexIfStart);
         this.subtemplateIfEndMatcher = new RegExp(SubTemplate.regexIfEnd);
     }
 
-    public scan() {
-        let matches: RegexMatch[] = [];
-        while (this.currentIndex < this.fileContents.length) {
-            let mappedExpressionMatch: RegExpExecArray = this.mappedExpressionMatcher.exec(this.fileContents);
-            let declaredIterationMatch: RegExpExecArray = this.declaredIterationMatcher.exec(this.fileContents);
-            let subtemplateForEachMatch: RegExpExecArray = this.subtemplateForEachMatcher.exec(this.fileContents);
-            let subtemplateIfMatch: RegExpExecArray = this.subtemplateIfMatcher.exec(this.fileContents);
-            let subtemplateForEachEndMatch: RegExpExecArray = this.subtemplateForEachEndMatcher.exec(this.fileContents);
-            let subtemplateIfEndMatch: RegExpExecArray = this.subtemplateIfEndMatcher.exec(this.fileContents);
+    public run() : ElementMatch[] {
+        let matches: ElementMatch[] = [];
+        while (true) {
+            let mappedExpressionMatch: RegExpExecArray = null;
+            let declaredIterationMatch: RegExpExecArray = null;
+            let subtemplateForEachStartMatch: RegExpExecArray = null;
+            let subtemplateIfStartMatch: RegExpExecArray = null;
+            let subtemplateForEachEndMatch: RegExpExecArray = null;
+            let subtemplateIfEndMatch: RegExpExecArray = null;
+            if(!this.mappedExpressionMatchDone)
+                mappedExpressionMatch = this.mappedExpressionMatcher.exec(this.contents);
+            if(!this.declaredIterationMatchDone)
+                declaredIterationMatch =this.declaredIterationMatcher.exec(this.contents);
+            if(!this.subtemplateForEachStartMatchDone)
+                subtemplateForEachStartMatch =this.subtemplateForEachStartMatcher.exec(this.contents);
+            if(!this.subtemplateIfStartMatchDone)
+                subtemplateIfStartMatch =this.subtemplateIfStartMatcher.exec(this.contents);
+            if(!this.subtemplateForEachEndMatchDone)
+                subtemplateForEachEndMatch =this.subtemplateForEachEndMatcher.exec(this.contents);
+            if(!this.subtemplateIfEndMatchDone)
+                subtemplateIfEndMatch =this.subtemplateIfEndMatcher.exec(this.contents);
 
-            if (mappedExpressionMatch == null
-                && declaredIterationMatch == null
-                && subtemplateForEachMatch == null
-                && subtemplateIfMatch == null) {
-                this.currentIndex = this.fileContents.length;
-                continue;
+            if (mappedExpressionMatch == null) this.mappedExpressionMatchDone = true;
+            if (declaredIterationMatch == null) this.declaredIterationMatchDone = true;
+            if (subtemplateForEachStartMatch == null) this.subtemplateForEachStartMatchDone = true;
+            if (subtemplateIfStartMatch == null) this.subtemplateIfStartMatchDone = true;
+            if (subtemplateForEachEndMatch == null) this.subtemplateForEachEndMatchDone = true;
+            if (subtemplateIfEndMatch == null) this.subtemplateIfEndMatchDone = true;
+            if(this.mappedExpressionMatchDone && this.declaredIterationMatchDone
+            && this.subtemplateForEachStartMatchDone && this.subtemplateForEachEndMatchDone
+            && this.subtemplateIfStartMatchDone && this.subtemplateIfEndMatchDone){
+                break;
             }
 
             if (mappedExpressionMatch != null) {
-                matches.push(new RegexMatch("mappedExpression", mappedExpressionMatch));
+                matches.push(new ElementMatch("mappedExpression", mappedExpressionMatch));
             }
             if (declaredIterationMatch != null) {
-                matches.push(new RegexMatch("declaredIteration", declaredIterationMatch));
+                matches.push(new ElementMatch("declaredIteration", declaredIterationMatch));
             }
-            if (subtemplateForEachMatch != null) {
-                matches.push(new RegexMatch("subtemplateForEach", subtemplateForEachMatch));
+            if (subtemplateForEachStartMatch != null) {
+                matches.push(new ElementMatch("forEachBlock", subtemplateForEachStartMatch));
             }
-            if (subtemplateIfMatch != null) {
-                matches.push(new RegexMatch("subtemplateIf", subtemplateIfMatch));
+            if (subtemplateIfStartMatch != null) {
+                matches.push(new ElementMatch("ifBlock", subtemplateIfStartMatch));
             }
             if (subtemplateForEachEndMatch != null) {
-                matches.push(new RegexMatch("subtemplateForEachEnd", subtemplateForEachEndMatch));
+                matches.push(new ElementMatch("forEachBlockEnd", subtemplateForEachEndMatch));
             }
             if (subtemplateIfEndMatch != null) {
-                matches.push(new RegexMatch("subtemplateIfEnd", subtemplateIfEndMatch));
+                matches.push(new ElementMatch("ifBlockEnd", subtemplateIfEndMatch));
             }
         }
-        //console.log(matches);
         matches.sort(TemplateScanner.sorter);
         matches.forEach(match => {
             console.log("Found a ["+match.type+"] at index ["+match.regex.index+"] it says ["+match.regex[0]+"]");
         });
+        return matches;
     }
 
-    private static sorter(exec1: RegexMatch, exec2: RegexMatch): number {
+    private static sorter(exec1: ElementMatch, exec2: ElementMatch): number {
         return exec1.regex.index - exec2.regex.index;
     }
 }
 
-class RegexMatch {
+export class ElementMatch {
     constructor(public type: string, public regex: RegExpExecArray) {
     }
 }
