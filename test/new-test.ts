@@ -1,4 +1,53 @@
 import * as fs from "fs";
-import { TemplateScanner } from "../src/core/template-scanner";
+import { TemplateProcessor } from "../src/template.processor";
 
-new TemplateScanner("new-format-test.atmpl", fs.readFileSync(__dirname+"/new-format-test.atmpl").toString()).scan();
+let processor: TemplateProcessor = new TemplateProcessor("new-format-test.atmpl", fs.readFileSync(__dirname+"/new-format-test.atmpl"));
+
+let input: {} = {
+  key : {
+    name: "llave",
+    value: "Test Plantilla",
+  },
+  sections: [
+    {
+      id: "SEC1",
+      name: "Section 1",
+      value: "ABC",
+      items: [
+        {
+          key: "A1",
+          value: "Valor 1 seccion 1"
+        },
+        {
+          key: "A2",
+          value: "Valor 2 seccion 1"
+        },
+        {
+          key: "A3",
+          value: "Valor 3 seccion 1"
+        },
+      ]
+    },
+    {
+      id: "SEC2",
+      name: "Section 2",
+      value: "XYZ",
+      items: [
+        {
+          key: "B1",
+          value: "Valor 1 seccion 2"
+        },
+        {
+          key: "B2",
+          value: "Valor 2 seccion 2"
+        },
+      ]
+    },
+  ],
+  conditioned: {
+    special: "AAA",
+  },
+
+}
+
+console.log(processor.run(input));

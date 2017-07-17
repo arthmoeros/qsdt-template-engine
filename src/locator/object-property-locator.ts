@@ -26,7 +26,7 @@ export class ObjectPropertyLocator {
                 resolvedValue = null;
                 break;
             }else{
-                if((i-1) < nesting.length && Array.isArray(nextChild)){
+                if((i+1) < nesting.length && Array.isArray(nextChild)){
                     throw new Error(`Path points to an array's child: ${path} at ${nesting[i+1]}`);
                 }
                 if((i+1) == nesting.length){
@@ -36,4 +36,5 @@ export class ObjectPropertyLocator {
         }
         return resolvedValue;
     }
+
 }

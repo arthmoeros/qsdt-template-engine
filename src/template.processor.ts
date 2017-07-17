@@ -160,7 +160,23 @@ export class TemplateProcessor {
 		let iterDecRegex: RegExp = new RegExp(DeclaredIteration.regex);
 		workingResult.replace(iterDecRegex, "");
 
-		// TODO: remove all foreachs and if blocks
+		// remove all foreachs and if blocks
+		let forEachRegexStart: RegExp = new RegExp(SubTemplate.regexForEachStart);
+		let forEachRegexEnd: RegExp = new RegExp(SubTemplate.regexForEachEnd);
+		let ifRegexStart: RegExp = new RegExp(SubTemplate.regexIfStart);
+		let ifRegexEnd: RegExp = new RegExp(SubTemplate.regexIfEnd);
+		while (forEachRegexStart.test(workingResult.toString())) {
+			workingResult.replace(forEachRegexStart, "");
+		}
+		while (forEachRegexEnd.test(workingResult.toString())) {
+			workingResult.replace(forEachRegexEnd, "");
+		}
+		while (ifRegexStart.test(workingResult.toString())) {
+			workingResult.replace(ifRegexStart, "");
+		}
+		while (ifRegexEnd.test(workingResult.toString())) {
+			workingResult.replace(ifRegexEnd, "");
+		}
 
 		return workingResult.toString();
 	}
@@ -178,22 +194,23 @@ export class TemplateProcessor {
 	}
 
 	private processForEachBlock(regexec: RegExpExecArray, matches: ElementMatch[], workingResult: StringContainer, input: {}, parentInput?: {}) {
-		let expr: RegExpExecArray = SubTemplate.validSyntaxForeach.exec(regexec[2]);
+		let syntaxRegex: RegExp = new RegExp(SubTemplate.validSyntaxForeach);
+		let expr: RegExpExecArray = syntaxRegex.exec(regexec[2]);
 		if (expr == null) {
 			throw new Error(`ForEach block has invalid syntax, found: ${regexec[0]}`);
 		}
 		let iteratedName: string = expr[1];
-		let listName: string = expr[3];
+		let listName: string = expr[2];
 
 		let list: any[] = ObjectPropertyLocator.lookup(input, listName);
-		if(parentInput != null && list == null){
+		if (parentInput != null && list == null) {
 			list = ObjectPropertyLocator.lookup(parentInput, listName);
 		}
-		if(list == null){
+		if (list == null) {
 			throw new Error(`Array named ${listName} wasn't found on input, neither in parentInput (if any)`);
 		}
 
-		let startIndex: number = regexec.index+regexec.length;
+		let startIndex: number = regexec.index + regexec[0].length;
 		let endIndex: number = null;
 
 		let nestedForEachBlocksFound: number = 0;
@@ -214,20 +231,22 @@ export class TemplateProcessor {
 				}
 			}
 		}
-		let subTemplate: string = workingResult.toString().substring(startIndex,endIndex);
+		let subTemplate: string = workingResult.toString().substring(startIndex + workingResult.$offset, endIndex + workingResult.$offset);
 		let replacementString: StringContainer = new StringContainer();
 		list.forEach((item) => {
 			let childProcessor: TemplateProcessor = new TemplateProcessor(this, subTemplate);
-			if(parentInput != null){
-				parentInput[iteratedName] = item;
-			}else{
-				input[iteratedName] = item;
+			let subInput: {} = {}
+			subInput[iteratedName] = item;
+			if (parentInput == null) {
+				parentInput = input;
+			} else {
+				subInput = Object.assign(subInput, input);
 			}
-			replacementString.append(childProcessor.run(item, parentInput != null ? parentInput : input));
+			replacementString.append(childProcessor.run(subInput, parentInput));
 		})
 		let offset: number = workingResult.$offset;
 		workingResult.replaceRange(startIndex + offset, endIndex + offset, replacementString.toString());
-		workingResult.$offset += (endIndex - startIndex) - replacementString.toString().length;
+		workingResult.$offset += replacementString.toString().length - (endIndex - startIndex);
 	}
 
 	private processIfBlock(regexec: RegExpExecArray, matches: ElementMatch[], workingResult: StringContainer, input: {}, parentInput?: {}) {
@@ -252,14 +271,14 @@ export class TemplateProcessor {
 					if (nestedIfBlocksFound > 0) {
 						nestedIfBlocksFound--;
 					} else {
-						endIndex = currentMatch.regex.index + currentMatch.regex.length;
+						endIndex = currentMatch.regex.index + currentMatch.regex[0].length;
 						break;
 					}
 				}
 			}
 			let offset: number = workingResult.$offset;
 			workingResult.replaceRange(startIndex + offset, endIndex + offset, "");
-			workingResult.$offset += (endIndex - startIndex) - 0;
+			workingResult.$offset += 0 - (endIndex - startIndex);
 		}
 	}
 
@@ -277,7 +296,7 @@ export class TemplateProcessor {
 		if (mapExpr.$isIterated) {
 			let replacementString: string = this.retrieveValueFromIterDec(mapExpr.$mappedKey);
 			workingResult.replaceRange(mapExpr.$startIndex + offset, mapExpr.$endIndex + offset, replacementString);
-			workingResult.$offset += regexec[0].length - replacementString.length;
+			workingResult.$offset += replacementString.length - regexec[0].length;
 		} else if (mapExpr.$isParameterized) {
 			if (this.templateParameters == null) {
 				throw new Error("Invalid Processor state: found Parameterized Expression, but no template parameters are set");
@@ -287,15 +306,18 @@ export class TemplateProcessor {
 				let paramProcessor: TemplateProcessor = new TemplateProcessor("(Parameterized)", this.templateParameters[mapExpr.$mappedKey], true);
 				let replacementString: string = paramProcessor.run(input);
 				workingResult.replaceRange(mapExpr.$startIndex + offset, mapExpr.$endIndex + offset, replacementString);
-				workingResult.$offset += regexec[0].length - replacementString.length;
+				workingResult.$offset += replacementString.length - regexec[0].length;
 			}
 		} else {
 			let mappedValue: string = ObjectPropertyLocator.lookup(input, mapExpr.$mappedKey);
+			if (mappedValue == null) {
+				mappedValue = ObjectPropertyLocator.lookup(parentInput, mapExpr.$mappedKey);
+			}
 			if (mappedValue == undefined && !mapExpr.$isOptional && !this.optionalityByDefault) {
 				console.warn("Expected key '" + mapExpr.$mappedKey + "', but provided map doesn't have a value associated with it, expect an invalid generated artifact from template located in '" + this.templateName + "' or maybe you should set the Mapped Expression as optional");
 			} else if (mappedValue == undefined && (mapExpr.$isOptional || this.optionalityByDefault)) {
 				workingResult.replaceRange(mapExpr.$startIndex + offset, mapExpr.$endIndex + offset, "");
-				workingResult.$offset += regexec[0].length - 0;
+				workingResult.$offset += 0 - regexec[0].length;
 			} else {
 				if (mapExpr.$isTernary) {
 					mappedValue = this.evaluateTernary(mappedValue, mapExpr);
@@ -304,7 +326,7 @@ export class TemplateProcessor {
 					mappedValue = this.pipeFunctionsProcessor.invoke(mapExpr.$pipeFunctions, mappedValue);
 				}
 				workingResult.replaceRange(mapExpr.$startIndex + offset, mapExpr.$endIndex + offset, mappedValue);
-				workingResult.$offset += regexec[0].length - mappedValue.length;
+				workingResult.$offset += mappedValue.length - regexec[0].length;
 			}
 		}
 	}

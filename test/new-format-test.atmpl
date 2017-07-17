@@ -9,6 +9,8 @@
             <description value="&{section.value}"/>
             ::foreach(item in section.items)::
             <item key="&{item.key}" value="&{item.value}"/>
+            <parentKey name="&{key.name}" value="&{key.value}" />
+            <sectionKey name="&{section.name}" value="&{section.id}" />
             ::/foreach::
         </section>
         ::/foreach::
@@ -17,5 +19,5 @@
             <special value="&{conditioned.special}"/>
         </conditioned>
         ::/if::
-    </body
+    </body>
 </root>

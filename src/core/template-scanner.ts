@@ -87,9 +87,9 @@ export class TemplateScanner {
             }
         }
         matches.sort(TemplateScanner.sorter);
-        matches.forEach(match => {
-            console.log("Found a ["+match.type+"] at index ["+match.regex.index+"] it says ["+match.regex[0]+"]");
-        });
+        // matches.forEach(match => {
+        //     console.log("Found a ["+match.type+"] at index ["+match.regex.index+"] it says ["+match.regex[0]+"]");
+        // });
         return matches;
     }
 
