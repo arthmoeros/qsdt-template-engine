@@ -137,7 +137,7 @@ In addition to a values map, a json parameters can be added to a Template Proces
 It can be used like this:
 
 ```typescript
-let testParameters: any = { testParameterKey: "testParamValue" };
+let testParameters: any = { testParameterKey: "&{keyOne}_&{keyTwo}" };
 
 let tmplProcessor: TemplateProcessor = new TemplateProcessor("templateFile.atmpl", fs.readFileSync("templateFile.atmpl"), custom);
 processor.setTemplateParameters(testParameters);
