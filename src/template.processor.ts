@@ -1,11 +1,10 @@
-import { StringContainer } from "@artifacter/common";
+import { StringContainer, StringHandlerUtil } from "@artifacter/common";
 
 import { SubTemplate } from "./entity/sub-template";
 import { ObjectPropertyLocator } from "./locator/object-property-locator";
 import { TemplateScanner, ElementMatch } from "./core/template-scanner";
 import { MappedExpression } from "./entity/mapped-expression";
 import { DeclaredIteration } from "./entity/declared-iteration";
-import { TemplateContainer } from "./container/template.container";
 import { PipeFunctionsProcessor } from "./pipe-functions.processor";
 import { DeclaredIterationProcessorsMap } from "./declared-iteration-processors-map";
 import { DeclaredIterationProcessor } from "./core/declared-iteration-processor";
@@ -90,6 +89,12 @@ export class TemplateProcessor {
 	 */
 	constructor(fileName: string, fileBuffer: Buffer, optionalityByDefault?: boolean, customPipeFunctions?: CustomPipeFunctions, declaredIterationProcessors?: DeclaredIterationProcessor[]);
 
+	/**
+	 * Construct a Template Processor containing a reference to a Parent Processor, this is meant to be used 
+	 * internally for sub-templates such as ForEach sections.
+	 * @param parentProcessor Parent Processor for state referencing on this child processor
+	 * @param nestedContents Partial template corresponding to the child sub-template
+	 */
 	constructor(parentProcessor: TemplateProcessor, nestedContents: string);
 
 	constructor(param1: string | TemplateProcessor, param2: Buffer | string, param3?: boolean, param4?: CustomPipeFunctions, param5?: DeclaredIterationProcessor[]) {
@@ -103,11 +108,11 @@ export class TemplateProcessor {
 			this.pipeFunctionsProcessor = param1.pipeFunctionsProcessor;
 			this.templateParameters = param1.templateParameters;
 			this.templateContents = param2;
-		} else if (typeof (param1) == "string") {
-			if (param1 == null) {
-				this.templateName = "(anonymous template)";
-			} else {
+		} else {
+			if (typeof (param1) == "string") {
 				this.templateName = param1;
+			} else {
+				this.templateName = "(anonymous template)";
 			}
 			if (param2 instanceof Buffer) {
 				this.templateContents = param2.toString();
@@ -118,6 +123,133 @@ export class TemplateProcessor {
 			this.pipeFunctionsProcessor = new PipeFunctionsProcessor(param4);
 			this.declaredIterationProcessorsMap = new DeclaredIterationProcessorsMap(param5);
 		}
+
+	}
+
+	/**
+	 * Optional Syntax checking, for atmpl files debugging purposes, 
+	 * it is not recommended to run on production enviroments.
+	 * It returns a string array with any syntax error found or null if it
+	 * did not find any problem.
+	 */
+	public checkSyntax(): string[] {
+		let scanner: TemplateScanner = new TemplateScanner(this.templateContents);
+		let matches: ElementMatch[] = scanner.run();
+
+		let syntaxErrors: string[] = [];
+		this.declaredIterations = []
+		matches.forEach(currentMatch => {
+			if (currentMatch.type == "mappedExpression") {
+				let expr: MappedExpression = new MappedExpression(currentMatch.regex);
+				if (expr.$invalidExprMsg != null) {
+					syntaxErrors.push(
+						"[MappedExpression Error] " +
+						expr.$invalidExprMsg.expr +
+						"(" + expr.$invalidExprMsg.lineNum +
+						":" + expr.$invalidExprMsg.colNum +
+						") -> " + expr.$invalidExprMsg.problem
+					)
+				}
+				if (expr.$isIterated) {
+					try {
+						this.retrieveValueFromIterDec(expr.$mappedKey);
+					} catch (error) {
+						let lineCol: [number, number] = StringHandlerUtil.locateLineColumnUpToIndex(currentMatch.regex.input, currentMatch.regex.index);
+						syntaxErrors.push(
+							"[Iterated MappedExpression Error] " +
+							currentMatch.regex[0] +
+							"(" + lineCol[0] +
+							":" + lineCol[1] +
+							") -> " + error.message
+						)
+					}
+				}
+			} else if (currentMatch.type == "declaredIteration") {
+				this.declaredIterations.push(new DeclaredIteration(currentMatch.regex));
+			} else if (currentMatch.type == "forEachBlock") {
+				let valid: boolean = new RegExp(SubTemplate.validSyntaxForeach).test(currentMatch.regex[0]);
+				if (!valid) {
+					let lineCol: [number, number] = StringHandlerUtil.locateLineColumnUpToIndex(currentMatch.regex.input, currentMatch.regex.index);
+					syntaxErrors.push(
+						"[ForEach SubTemplate Error] " +
+						currentMatch.regex[0] +
+						"(" + lineCol[0] +
+						":" + lineCol[1] +
+						") -> Has invalid Syntax"
+					)
+				}
+			} else if (currentMatch.type == "ifBlock") {
+				let valid: boolean = new RegExp(SubTemplate.validSyntaxIf).test(currentMatch.regex[0]);
+				if (!valid) {
+					let lineCol: [number, number] = StringHandlerUtil.locateLineColumnUpToIndex(currentMatch.regex.input, currentMatch.regex.index);
+					syntaxErrors.push(
+						"[If SubTemplate Error] " +
+						currentMatch.regex[0] +
+						"(" + lineCol[0] +
+						":" + lineCol[1] +
+						") -> Has invalid Syntax"
+					)
+				}
+			}
+		});
+		this.declaredIterations = [];
+
+		let forEachFound: ElementMatch[] = [];
+		let ifFound: ElementMatch[] = [];
+		let closingAloneFound: ElementMatch[] = [];
+		matches.forEach((currentMatch) => {
+			if (currentMatch.type == "forEachBlock") {
+				forEachFound.push(currentMatch);
+			} else if (currentMatch.type == "forEachBlockEnd") {
+				if (forEachFound.length == 0) {
+					closingAloneFound.push(currentMatch);
+				} else {
+					forEachFound.pop();
+				}
+			} else if (currentMatch.type == "ifBlock") {
+				ifFound.push(currentMatch);
+			} else if (currentMatch.type == "ifBlockEnd") {
+				if (ifFound.length == 0) {
+					closingAloneFound.push(currentMatch);
+				} else {
+					ifFound.pop();
+				}
+			}
+		});
+		forEachFound.forEach((forEach) => {
+			let lineCol: [number, number] = StringHandlerUtil.locateLineColumnUpToIndex(forEach.regex.input, forEach.regex.index);
+			syntaxErrors.push(
+				"[ForEach SubTemplate Error] " +
+				forEach.regex[0] +
+				"(" + lineCol[0] +
+				":" + lineCol[1] +
+				") -> Doesn't have a closing expression"
+			)
+		});
+		ifFound.forEach((ifexpr) => {
+			let lineCol: [number, number] = StringHandlerUtil.locateLineColumnUpToIndex(ifexpr.regex.input, ifexpr.regex.index);
+			syntaxErrors.push(
+				"[If SubTemplate Error] " +
+				ifexpr.regex[0] +
+				"(" + lineCol[0] +
+				":" + lineCol[1] +
+				") -> Doesn't have a closing expression"
+			)
+		});
+		closingAloneFound.forEach((closing) => {
+			let lineCol: [number, number] = StringHandlerUtil.locateLineColumnUpToIndex(closing.regex.input, closing.regex.index);
+			syntaxErrors.push(
+				"[SubTemplate Closing Error] " +
+				closing.regex[0] +
+				"(" + lineCol[0] +
+				":" + lineCol[1] +
+				") -> Doesn't have a matching opening expression"
+			)
+		});
+		if (syntaxErrors.length == 0) {
+			return null;
+		}
+		return syntaxErrors;
 	}
 
 	/**
@@ -125,25 +257,39 @@ export class TemplateProcessor {
 	 * template has parameterized expressions, these parameters must be set before the 
 	 * processor is run, otherwise it will raise an error
 	 */
-	public setTemplateParameters(templateParameters: any) {
+	public setTemplateParameters(templateParameters: {}) {
 		this.templateParameters = templateParameters;
 	}
 
 	/**
-	 * Runs the processor, checks if atmpl is invalid or if the map is empty.
-	 * This process puts the map's values into the mapped expressions following their defined 
-	 * instructions.
-	 * It will emit a warning if a map value from a non-optional mapped expression's mappedKey 
-	 * is not found, resulting in a potential invalid generated artifact.
+	 * Runs the processor and returns the generated artifact.
+	 * It has minimun checks but does not check the atmpl syntax correctness fully, 
+	 * if it has any problem it will throw an error or it may result in a incorrect artifact, 
+	 * if you need to check for syntax correctness it is advised to debug first the atmpl 
+	 * file using the #checkSyntax() method.
 	 * 
-	 * @param map map containing the data to put into mapped expressions
+	 * It is backwards compatible with the old #run(Map<string,string>) version (internally converts it
+	 * to an object)
+	 * 
+	 * @param input Input object where to retrieve the data to fill the template.
+	 * @param parentInput Required parent object for child processors, internally used for foreach sub-templates
+	 * @return Generated artifact
 	 */
 	public run(input: {}, parentInput?: {}): string {
+		if(input instanceof Map){
+			let convertedInput: {} = {};
+			input.forEach((value, key) =>{
+				convertedInput[key] = value;
+			});
+			input = convertedInput;
+		}
 		if (this.parentProcessor != null && parentInput == null) {
 			throw new Error("This is a nested processor but no parent input was provided");
 		}
 		let workingResult: StringContainer = new StringContainer(this.templateContents);
-		this.declaredIterationProcessorsMap.initializeProcessors();
+		if (this.parentProcessor == null) {
+			this.declaredIterationProcessorsMap.initializeProcessors();
+		}
 
 		let scanner: TemplateScanner = new TemplateScanner(this.templateContents);
 		let matches: ElementMatch[] = scanner.run();
@@ -160,7 +306,7 @@ export class TemplateProcessor {
 		let iterDecRegex: RegExp = new RegExp(DeclaredIteration.regex);
 		workingResult.replace(iterDecRegex, "");
 
-		// remove all foreachs and if blocks
+		// remove all foreachs and if expression blocks
 		let forEachRegexStart: RegExp = new RegExp(SubTemplate.regexForEachStart);
 		let forEachRegexEnd: RegExp = new RegExp(SubTemplate.regexForEachEnd);
 		let ifRegexStart: RegExp = new RegExp(SubTemplate.regexIfStart);
@@ -181,6 +327,14 @@ export class TemplateProcessor {
 		return workingResult.toString();
 	}
 
+	/**
+	 * Processes an Element Match, it determines which type of element is and works it acordingly
+	 * @param currentMatch Current element match to process
+	 * @param matches All element matches left to process
+	 * @param workingResult StringContainer with the "in work" resulting artifact
+	 * @param input input object on this process run
+	 * @param parentInput parent input object of this child process run
+	 */
 	private processMatch(currentMatch: ElementMatch, matches: ElementMatch[], workingResult: StringContainer, input: {}, parentInput?: {}) {
 		if (currentMatch.type == "mappedExpression") {
 			this.processMappedExpression(currentMatch.regex, workingResult, input, parentInput);
@@ -193,6 +347,15 @@ export class TemplateProcessor {
 		}
 	}
 
+	/**
+	 * Processes a ForEach block, it spawns a child process for its sub-template
+	 * 
+	 * @param regexec RegExp execution result for a foreach block
+	 * @param matches All element matches left to process
+	 * @param workingResult StringContainer with the "in work" resulting artifact
+	 * @param input input object on this process run
+	 * @param parentInput parent input object of this child process run
+	 */
 	private processForEachBlock(regexec: RegExpExecArray, matches: ElementMatch[], workingResult: StringContainer, input: {}, parentInput?: {}) {
 		let syntaxRegex: RegExp = new RegExp(SubTemplate.validSyntaxForeach);
 		let expr: RegExpExecArray = syntaxRegex.exec(regexec[2]);
@@ -249,6 +412,16 @@ export class TemplateProcessor {
 		workingResult.$offset += replacementString.toString().length - (endIndex - startIndex);
 	}
 
+	/**
+	 * Processes an If block, if the element indicated in the expression results in null,
+	 * the whole If block is eliminated from the working result
+	 * 
+	 * @param regexec RegExp execution result for an if block
+	 * @param matches All element matches left to process
+	 * @param workingResult StringContainer with the "in work" resulting artifact
+	 * @param input input object on this process run
+	 * @param parentInput parent input object of this child process run
+	 */
 	private processIfBlock(regexec: RegExpExecArray, matches: ElementMatch[], workingResult: StringContainer, input: {}, parentInput?: {}) {
 		let expr: string = regexec[2];
 		if (!SubTemplate.validSyntaxIf.test(expr)) {
@@ -257,6 +430,9 @@ export class TemplateProcessor {
 		let startIndex: number = regexec.index;
 		let endIndex: number = null;
 		let foundValue: any = ObjectPropertyLocator.lookup(input, expr);
+		if (parentInput != null && foundValue == null) {
+			foundValue = ObjectPropertyLocator.lookup(parentInput, expr);
+		}
 		if (foundValue == null) {
 			let nestedIfBlocksFound: number = 0;
 			while (true) {
@@ -282,11 +458,24 @@ export class TemplateProcessor {
 		}
 	}
 
+	/**
+	 * Adds the found Declared Iteration for any Iterated Mapped Expression use
+	 * 
+	 * @param regexec RegExp execution result for a Declared Iteration
+	 */
 	private processDeclaredIteration(regexec: RegExpExecArray) {
 		let decIter: DeclaredIteration = new DeclaredIteration(regexec);
 		this.declaredIterations.push(decIter);
 	}
 
+	/**
+	 * Process a Mapped Expression, it has the minimum checks in place
+	 * 
+	 * @param regexec RegExp execution result for a Mapped Expression
+	 * @param workingResult StringContainer with the "in work" resulting artifact
+	 * @param input input object on this process run
+	 * @param parentInput parent input object of this child process run
+	 */
 	private processMappedExpression(regexec: RegExpExecArray, workingResult: StringContainer, input: {}, parentInput?: {}) {
 		let mapExpr: MappedExpression = new MappedExpression(regexec);
 		if (mapExpr.$invalidExprMsg != null) {

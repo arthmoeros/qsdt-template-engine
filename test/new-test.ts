@@ -3,6 +3,8 @@ import { TemplateProcessor } from "../src/template.processor";
 
 let processor: TemplateProcessor = new TemplateProcessor("new-format-test.atmpl", fs.readFileSync(__dirname+"/new-format-test.atmpl"));
 
+console.log(processor.checkSyntax());
+
 let input: {} = {
   key : {
     name: "llave",
@@ -49,5 +51,10 @@ let input: {} = {
   },
 
 }
+
+processor.setTemplateParameters({
+  parameter : "&{key.name}"
+});
+
 
 console.log(processor.run(input));

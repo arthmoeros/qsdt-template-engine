@@ -1,3 +1,4 @@
+#iteration(iterKey=numberCounter)
 <root>
     <head>
         <key name="&{key.name}" value="&{key.value}" />
@@ -10,13 +11,14 @@
             ::foreach(item in section.items)::
             <item key="&{item.key}" value="&{item.value}"/>
             <parentKey name="&{key.name}" value="&{key.value}" />
-            <sectionKey name="&{section.name}" value="&{section.id}" />
+            <sectionKey name="&{section.name}" value="&{section.id}" number="&{#iterKey}" />
             ::/foreach::
         </section>
         ::/foreach::
         ::if(conditioned)::
         <conditioned>
             <special value="&{conditioned.special}"/>
+            <parameter value="&{:parameter}" />
         </conditioned>
         ::/if::
     </body>
