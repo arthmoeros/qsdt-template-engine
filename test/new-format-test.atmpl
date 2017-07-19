@@ -1,0 +1,25 @@
+#iteration(iterKey=numberCounter)
+<root>
+    <head>
+        <key name="&{key.name}" value="&{key.value}" />
+    </head>
+    <body>
+        ::foreach(section in sections)::
+        <section id="&{section.id}">
+            <title name="&{section.name}"/>
+            <description value="&{section.value}"/>
+            ::foreach(item in section.items)::
+            <item key="&{item.key}" value="&{item.value}"/>
+            <parentKey name="&{key.name}" value="&{key.value}" />
+            <sectionKey name="&{section.name}" value="&{section.id}" number="&{#iterKey}" />
+            ::/foreach::
+        </section>
+        ::/foreach::
+        ::present(conditioned)::
+        <conditioned>
+            <special value="&{conditioned.special}"/>
+            <parameter value="&{:parameter}" />
+        </conditioned>
+        ::/present::
+    </body>
+</root>

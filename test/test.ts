@@ -14,7 +14,7 @@ let testParameters: any = tests.testParameters;
 console.log("Testing mapped expressions");
 for (let key in tests.mappedExpressionTest) {
     console.log("Testing " + key);
-    let processor: TemplateProcessor = new TemplateProcessor(tests.mappedExpressionTest[key].expr);
+    let processor: TemplateProcessor = new TemplateProcessor(null, tests.mappedExpressionTest[key].expr);
     let outcome: string = processor.run(testMap);
     if (outcome == tests.mappedExpressionTest[key].expectedOutcome) {
         console.log("Test is SUCCESSFUL");
@@ -24,7 +24,7 @@ for (let key in tests.mappedExpressionTest) {
 }
 
 console.log("Testing Parameterized Expression");
-let processor: TemplateProcessor = new TemplateProcessor(tests.parameterizedExpressionTest.test.expr);
+let processor: TemplateProcessor = new TemplateProcessor(null, tests.parameterizedExpressionTest.test.expr);
 processor.setTemplateParameters(testParameters);
 let outcome: string = processor.run(testMap);
 if (outcome == tests.parameterizedExpressionTest.test.expectedOutcome) {
@@ -36,7 +36,7 @@ if (outcome == tests.parameterizedExpressionTest.test.expectedOutcome) {
 
 
 console.log("Testing Iterated Expression");
-let processor2: TemplateProcessor = new TemplateProcessor(tests.iteratedExpressionTest.test.expr);
+let processor2: TemplateProcessor = new TemplateProcessor(null, tests.iteratedExpressionTest.test.expr);
 let outcome2: string = processor2.run(testMap);
 if (outcome2 == tests.iteratedExpressionTest.test.expectedOutcome) {
     console.log("Test is SUCCESSFUL");

@@ -37,7 +37,7 @@
 	"iteratedExpressionTest": {
 		"test" : {
 			"expr" : "#iteration(counter=numberCounter)\nPRIMERO=&{#counter};SEGUNDO=&{#counter};TERCERO=&{#counter}",
-			"expectedOutcome": "PRIMERO=3;SEGUNDO=2;TERCERO=1"
+			"expectedOutcome": "PRIMERO=1;SEGUNDO=2;TERCERO=3"
 		}
 	}
 }
