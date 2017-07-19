@@ -193,7 +193,7 @@ The parent object also can be referenced within the foreach block, its value wil
 
 #### What's coming next? - Planned features for a future release
 
-For this engine I don't have more ideas, I don't want it to become too complicated, with its current features I think is more than enough to support a wide variety of artifact generation.
+For this engine I don't have more ideas, I don't want it to become too complicated, with its current features I think is more than enough to support a wide variety of artifact generation options.
 
 If you have any suggestion for new features, I will gladly hear you out along with a simple use case.
 
