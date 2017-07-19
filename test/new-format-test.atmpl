@@ -15,11 +15,11 @@
             ::/foreach::
         </section>
         ::/foreach::
-        ::if(conditioned)::
+        ::present(conditioned)::
         <conditioned>
             <special value="&{conditioned.special}"/>
             <parameter value="&{:parameter}" />
         </conditioned>
-        ::/if::
+        ::/present::
     </body>
 </root>

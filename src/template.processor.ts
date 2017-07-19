@@ -74,7 +74,8 @@ export class TemplateProcessor {
 	private templateName: string;
 
 	/**
-	 * Constructs a Template Processor with an anonymous template
+	 * Constructs a Template Processor with a named string template or null for anonymous template
+	 * @param templateName this template name or null for anonymous template
 	 * @param stringTmpl string containing template contents
 	 * @param optionalityByDefault makes all mapped expressions optional by default
 	 */
@@ -84,6 +85,7 @@ export class TemplateProcessor {
 	 * Construct a Templater Processor with an atmpl file and optional custom pipe functions and custom template functions
 	 * @param fileName atmpl file name
 	 * @param fileBuffer atmpl Buffer with atmpl contents
+	 * @param optionalityByDefault makes all mapped expressions optional by default
 	 * @param customPipeFunctions Custom Pipe Functions to use, it must contain methods annotated with @PipeFunction
 	 * @param declaredIterationProcessors Custom Declared Iteration Processors to use, these must extend the class DeclaredIterationProcessor
 	 */
@@ -178,8 +180,8 @@ export class TemplateProcessor {
 						") -> Has invalid Syntax"
 					)
 				}
-			} else if (currentMatch.type == "ifBlock") {
-				let valid: boolean = new RegExp(SubTemplate.validSyntaxIf).test(currentMatch.regex[0]);
+			} else if (currentMatch.type == "presentBlock") {
+				let valid: boolean = new RegExp(SubTemplate.validSyntaxPresent).test(currentMatch.regex[0]);
 				if (!valid) {
 					let lineCol: [number, number] = StringHandlerUtil.locateLineColumnUpToIndex(currentMatch.regex.input, currentMatch.regex.index);
 					syntaxErrors.push(
@@ -195,7 +197,7 @@ export class TemplateProcessor {
 		this.declaredIterations = [];
 
 		let forEachFound: ElementMatch[] = [];
-		let ifFound: ElementMatch[] = [];
+		let presentFound: ElementMatch[] = [];
 		let closingAloneFound: ElementMatch[] = [];
 		matches.forEach((currentMatch) => {
 			if (currentMatch.type == "forEachBlock") {
@@ -206,13 +208,13 @@ export class TemplateProcessor {
 				} else {
 					forEachFound.pop();
 				}
-			} else if (currentMatch.type == "ifBlock") {
-				ifFound.push(currentMatch);
-			} else if (currentMatch.type == "ifBlockEnd") {
-				if (ifFound.length == 0) {
+			} else if (currentMatch.type == "presentBlock") {
+				presentFound.push(currentMatch);
+			} else if (currentMatch.type == "presentBlockEnd") {
+				if (presentFound.length == 0) {
 					closingAloneFound.push(currentMatch);
 				} else {
-					ifFound.pop();
+					presentFound.pop();
 				}
 			}
 		});
@@ -226,7 +228,7 @@ export class TemplateProcessor {
 				") -> Doesn't have a closing expression"
 			)
 		});
-		ifFound.forEach((ifexpr) => {
+		presentFound.forEach((ifexpr) => {
 			let lineCol: [number, number] = StringHandlerUtil.locateLineColumnUpToIndex(ifexpr.regex.input, ifexpr.regex.index);
 			syntaxErrors.push(
 				"[If SubTemplate Error] " +
@@ -309,19 +311,19 @@ export class TemplateProcessor {
 		// remove all foreachs and if expression blocks
 		let forEachRegexStart: RegExp = new RegExp(SubTemplate.regexForEachStart);
 		let forEachRegexEnd: RegExp = new RegExp(SubTemplate.regexForEachEnd);
-		let ifRegexStart: RegExp = new RegExp(SubTemplate.regexIfStart);
-		let ifRegexEnd: RegExp = new RegExp(SubTemplate.regexIfEnd);
+		let presentRegexStart: RegExp = new RegExp(SubTemplate.regexPresentStart);
+		let presentRegexEnd: RegExp = new RegExp(SubTemplate.regexPresentEnd);
 		while (forEachRegexStart.test(workingResult.toString())) {
 			workingResult.replace(forEachRegexStart, "");
 		}
 		while (forEachRegexEnd.test(workingResult.toString())) {
 			workingResult.replace(forEachRegexEnd, "");
 		}
-		while (ifRegexStart.test(workingResult.toString())) {
-			workingResult.replace(ifRegexStart, "");
+		while (presentRegexStart.test(workingResult.toString())) {
+			workingResult.replace(presentRegexStart, "");
 		}
-		while (ifRegexEnd.test(workingResult.toString())) {
-			workingResult.replace(ifRegexEnd, "");
+		while (presentRegexEnd.test(workingResult.toString())) {
+			workingResult.replace(presentRegexEnd, "");
 		}
 
 		return workingResult.toString();
@@ -342,8 +344,8 @@ export class TemplateProcessor {
 			this.processDeclaredIteration(currentMatch.regex);
 		} else if (currentMatch.type == "forEachBlock") {
 			this.processForEachBlock(currentMatch.regex, matches, workingResult, input, parentInput);
-		} else if (currentMatch.type == "ifBlock") {
-			this.processIfBlock(currentMatch.regex, matches, workingResult, input, parentInput);
+		} else if (currentMatch.type == "presentBlock") {
+			this.processPresentBlock(currentMatch.regex, matches, workingResult, input, parentInput);
 		}
 	}
 
@@ -422,10 +424,10 @@ export class TemplateProcessor {
 	 * @param input input object on this process run
 	 * @param parentInput parent input object of this child process run
 	 */
-	private processIfBlock(regexec: RegExpExecArray, matches: ElementMatch[], workingResult: StringContainer, input: {}, parentInput?: {}) {
+	private processPresentBlock(regexec: RegExpExecArray, matches: ElementMatch[], workingResult: StringContainer, input: {}, parentInput?: {}) {
 		let expr: string = regexec[2];
-		if (!SubTemplate.validSyntaxIf.test(expr)) {
-			throw new Error(`If block has invalid syntax, found: ${regexec[0]}`);
+		if (!SubTemplate.validSyntaxPresent.test(expr)) {
+			throw new Error(`Present block has invalid syntax, found: ${regexec[0]}`);
 		}
 		let startIndex: number = regexec.index;
 		let endIndex: number = null;
@@ -434,18 +436,18 @@ export class TemplateProcessor {
 			foundValue = ObjectPropertyLocator.lookup(parentInput, expr);
 		}
 		if (foundValue == null) {
-			let nestedIfBlocksFound: number = 0;
+			let nestedPresentBlocksFound: number = 0;
 			while (true) {
 				let currentMatch: ElementMatch = matches.shift();
 				if (currentMatch == null) {
 					throw new Error("Reached the end of matches and didn't find the closing If block");
 				}
-				if (currentMatch.type == "ifBlock") {
-					nestedIfBlocksFound++;
+				if (currentMatch.type == "presentBlock") {
+					nestedPresentBlocksFound++;
 				}
-				if (currentMatch.type == "ifBlockEnd") {
-					if (nestedIfBlocksFound > 0) {
-						nestedIfBlocksFound--;
+				if (currentMatch.type == "presentBlockEnd") {
+					if (nestedPresentBlocksFound > 0) {
+						nestedPresentBlocksFound--;
 					} else {
 						endIndex = currentMatch.regex.index + currentMatch.regex[0].length;
 						break;
