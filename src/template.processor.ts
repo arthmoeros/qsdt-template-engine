@@ -500,7 +500,7 @@ export class TemplateProcessor {
 			}
 		} else {
 			let mappedValue: string = ObjectPropertyLocator.lookup(input, mapExpr.$mappedKey);
-			if (mappedValue == null) {
+			if (mappedValue == null && parentInput != null) {
 				mappedValue = ObjectPropertyLocator.lookup(parentInput, mapExpr.$mappedKey);
 			}
 			if (mappedValue == undefined && !mapExpr.$isOptional && !this.optionalityByDefault) {

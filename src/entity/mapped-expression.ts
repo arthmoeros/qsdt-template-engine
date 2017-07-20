@@ -22,7 +22,7 @@ export class MappedExpression {
 	/**
 	 * A grouped regex that structures into capture groups the representation of a normal mapped expression
 	 */
-	private static readonly groupedRegex: RegExp = /(&{)(\*)? *(\([a-zA-Z0-9_,\[\]'" ]*?\))? *(!)?([a-zA-Z0-9_.'" ]*?[=!<>]*?[a-zA-Z0-9_.'" ]*?) *(\?)? *(\"[a-zA-Z0-9_. ]*?\")? *('[a-zA-Z0-9_. ]*?')? *(:)? *(\"[a-zA-Z0-9_. ]*?\")? *('[a-zA-Z0-9_. ]*?')? *(})/g;
+	private static readonly groupedRegex: RegExp = /(&{)(\*)? *(\([a-zA-Z0-9_, ]*?\[*.+\]*[a-zA-Z0-9_, ]*?\))? *(!)?([a-zA-Z0-9_.'" ]*?[=!<>]*?[a-zA-Z0-9_.'" ]*?) *(\?)? *(\"[a-zA-Z0-9_. ]*?\")? *('[a-zA-Z0-9_. ]*?')? *(:)? *(\"[a-zA-Z0-9_. ]*?\")? *('[a-zA-Z0-9_. ]*?')? *(})/g;
 
 	/**
 	 * regex for valid mappedKey (not ternary)

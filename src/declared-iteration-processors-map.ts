@@ -24,12 +24,11 @@ export class DeclaredIterationProcessorsMap {
 	 * @param customProcessors 
 	 */
 	constructor(customProcessors?: DeclaredIterationProcessor[]) {
-		let coreOsb11gGuid: DeclaredIterationProcessor = new Osb11gGuid()
 		this.coreProcessors = {};
+		let coreOsb11gGuid: DeclaredIterationProcessor = new Osb11gGuid()
 		this.coreProcessors[coreOsb11gGuid.identifier()] = coreOsb11gGuid;
 		
 		let numberCounter: DeclaredIterationProcessor = new NumberCounter()
-		this.coreProcessors = {};
 		this.coreProcessors[numberCounter.identifier()] = numberCounter;
 
 		this.customProcessors = {};
