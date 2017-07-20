@@ -17,7 +17,7 @@ const subTmplReged = new RegExp(/(::)*([a-zA-Z0-9_./]*?)*(::)/g);
  * @see also README.md of this project for an explanation about atmpl files
  * @author arthmoeros (Arturo Saavedra) artu.saavedra@gmail.com
  * 
- * This is the main class for template processing, it uses a Map<string, string> to process the template
+ * This is the main class for template processing, it uses a generic object to process the template
  * into a filled artifact with its data.
  * 
  */
@@ -566,9 +566,9 @@ export class TemplateProcessor {
 	 * It will return true only if the value found from the mappedKey and is "true" or "1", otherwise
 	 * it returns false
 	 * @param expression String containing a single MappedExpression
-	 * @param map values map to use for processing
+	 * @param request values generic object to use for processing
 	 */
-	public static evaluateBoolean(expression: string, map: Map<string, string>): boolean {
+	public static evaluateBoolean(expression: string, request: {}): boolean {
 		const mapExpRegex = new RegExp(MappedExpression.regex);
 		let result: RegExpExecArray = mapExpRegex.exec(expression);
 		if (mapExpRegex.lastIndex == 0) {
@@ -578,7 +578,7 @@ export class TemplateProcessor {
 		if (expr.$isTernary) {
 			throw new Error("Mapped expression has a ternary, this method cannot be used with it");
 		}
-		let value: any = map.get(expr.$mappedKey);
+		let value: any = ObjectPropertyLocator.lookup(request, expr.$mappedKey);
 		if (value != null) {
 			if (typeof (value) == "boolean") {
 				return expr.$isNegated ? !value : value;
