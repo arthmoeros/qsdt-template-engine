@@ -1,7 +1,6 @@
-import { StringContainer, StringHandlerUtil } from "@artifacter/common";
+import { StringContainer, StringHandlerUtil, ObjectPropertyLocator } from "@artifacter/common";
 
 import { SubTemplate } from "./entity/sub-template";
-import { ObjectPropertyLocator } from "./locator/object-property-locator";
 import { TemplateScanner, ElementMatch } from "./core/template-scanner";
 import { MappedExpression } from "./entity/mapped-expression";
 import { DeclaredIteration } from "./entity/declared-iteration";
