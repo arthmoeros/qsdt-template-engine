@@ -37,7 +37,7 @@ export class PipeFunctionsProcessor {
 	public invoke(functions: string[], inputValue: string): string {
 		let corePipeFunctions = PipeFunctionsProcessor.corePipeFunctions;
 		let customPipeFunctions = this.customPipeFunctions;
-		let result: string = inputValue;
+		let result: string = inputValue.toString();
 		functions.forEach(func => {
 			let pipeFunction: { name: string, parameters?: string[] } = this.parsePipeFunction(func);
 			let corePipeFunction: Function = corePipeFunctions[pipeFunction.name];

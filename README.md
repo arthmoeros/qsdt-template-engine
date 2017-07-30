@@ -1,4 +1,4 @@
-# ![artifacter-logo](https://raw.githubusercontent.com/arthmoeros/artifacter-ui/master/src/rsz_artifacter-logo.png)@artifacter/template-engine (v2.0 release)
+# ![artifacter-logo](https://raw.githubusercontent.com/arthmoeros/artifacter-ui/master/src/assets/img/rsz_artifacter-logo.png)@artifacter/template-engine (v2.0 release)
 
 ### Artifacter's template processing engine
 
