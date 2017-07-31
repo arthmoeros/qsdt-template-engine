@@ -66,6 +66,24 @@ export class CorePipeFunctions {
 		return StringHandlerUtil.convertCamelCaseToDashed(str);
 	};
 
+    private coreBlanksToCamelCase = (str: string): string => {
+        let words: string[] = str.split(" ");
+        if (words.length <= 1) {
+            return str;
+        } else {
+            let camelCase: StringContainer = new StringContainer();
+            let firstLoop: boolean = true;
+            words.forEach(word => {
+                if (firstLoop) {
+                    camelCase.append(word);
+                    firstLoop = false;
+                } else {
+                    camelCase.append(this.coreSUC(word));
+                }
+            });
+            return camelCase.toString();
+        }
+    };
 
 	/**
 	 * All Upper Case
@@ -127,6 +145,14 @@ export class CorePipeFunctions {
 	 */
 	public get cc2dashed(): (value: string, ...args: string[]) => string {
 		return this.coreCC2Dashed;
+	}
+
+	/**
+	 * Converts a blank space separated words string to a camel case
+	 * @param str 
+	 */
+	public get blanks2cc(): (value: string, ...args: string[]) => string {
+		return this.coreBlanksToCamelCase;
 	}
 
 }
