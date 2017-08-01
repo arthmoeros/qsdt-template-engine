@@ -516,7 +516,7 @@ export class TemplateProcessor {
 					mappedValue = this.pipeFunctionsProcessor.invoke(mapExpr.$pipeFunctions, mappedValue);
 				}
 				workingResult.replaceRange(mapExpr.$startIndex + offset, mapExpr.$endIndex + offset, mappedValue);
-				workingResult.$offset += mappedValue.length - regexec[0].length;
+				workingResult.$offset += String(mappedValue).length - regexec[0].length;
 			}
 		}
 	}
