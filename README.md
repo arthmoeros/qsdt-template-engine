@@ -28,7 +28,7 @@ The atmpl format is Artifacter template syntax, for simplicity sake let's say we
 ##### Mapped Expression
 This expression defines how a value contained in a generic object under certain key will replace its content, a Mapped Expression is broken down as follows:
 
-![alt mapped-expression-syntax-img](https://raw.githubusercontent.com/arthmoeros/artifacter-ui/master/doc-img/mapped_expression_syntax.gif)
+![alt mapped-expression-syntax-img](https://raw.githubusercontent.com/arthmoeros/artifacter-template-engine/master/doc/mapped_expression_syntax.gif)
 
 Now, about these parts:
 
