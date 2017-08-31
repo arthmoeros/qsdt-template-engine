@@ -1,7 +1,7 @@
 {
-  "name": "@artifacter/template-engine",
+  "name": "@derial/template-engine",
   "version": "2.0.6",
-  "description": "Artifacter's template processing engine",
+  "description": "Derial's template processing engine",
   "main": "index.js",
   "scripts": {
     "prepublish": "tsc",
@@ -17,7 +17,8 @@
     "artifacter",
     "template",
     "engine",
-    "processing"
+    "processing",
+    "derial"
   ],
   "author": "arthmoeros",
   "license": "GPL-3.0",
@@ -27,8 +28,10 @@
   "homepage": "https://github.com/arthmoeros/artifacter-template-engine#readme",
   "dependencies": {
     "@artifacter/common": "^1.0.1",
-    "@types/node": "^7.0.14",
     "hashcode": "^1.0.3",
     "ip": "^1.1.5"
+  },
+  "devDependencies": {
+    "@types/node": "^7.0.14"
   }
 }
