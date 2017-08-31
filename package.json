@@ -1,6 +1,6 @@
 {
   "name": "@derial/template-engine",
-  "version": "2.0.6",
+  "version": "2.0.7",
   "description": "Derial's template processing engine",
   "main": "index.js",
   "scripts": {
