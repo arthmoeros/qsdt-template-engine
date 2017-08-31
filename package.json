@@ -1,7 +1,7 @@
 {
-  "name": "@derial/template-engine",
+  "name": "@devial/template-engine",
   "version": "2.0.7",
-  "description": "Derial's template processing engine",
+  "description": "Devial's template processing engine",
   "main": "index.js",
   "scripts": {
     "prepublish": "tsc",
@@ -18,7 +18,7 @@
     "template",
     "engine",
     "processing",
-    "derial"
+    "devial"
   ],
   "author": "arthmoeros",
   "license": "GPL-3.0",
