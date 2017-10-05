@@ -1,6 +1,6 @@
-# ![artifacter-logo](https://raw.githubusercontent.com/arthmoeros/artifacter-ui/master/src/assets/img/rsz_artifacter-logo.png)@artifacter/template-engine (v2.0 release)
+# ![qsdt-logo](https://raw.githubusercontent.com/arthmoeros/qsdt-ui/master/src/assets/img/rsz_qsdt-logo.png)@qsdt/template-engine (v2.0 release)
 
-### Artifacter's template processing engine
+### QSDT's template processing engine
 
 #### What's new? - New Features in 2.0
 - Input value now can be a fully structured Object (like a JSON)
@@ -13,7 +13,7 @@
     - Allows to skip a whole section if a given value is undefined/null in the input object
 
 #### What's this? - Intro
-This is the core of the Template Engine that Artifacter uses for its artifacts generation, it makes use of the atmpl format whose syntax is explained further in this same document. This engine is made for Artifacter, but has the purpose of reusability in mind, so any other consumer can extend it a bit without modifying its core, it allows a bit further customization on its template processing via Custom Pipe Functions and Declared Iteration Processors.
+This is the core of the Template Engine that QSDT uses for its artifacts generation, it makes use of the atmpl format whose syntax is explained further in this same document. This engine is made for QSDT, but has the purpose of reusability in mind, so any other consumer can extend it a bit without modifying its core, it allows a bit further customization on its template processing via Custom Pipe Functions and Declared Iteration Processors.
 
 #### What's in here? - API
 The available API for those who import the package is as follows:
@@ -23,12 +23,12 @@ This is the main class for template processing, it uses a generic object {} to p
 In the case of processing a file, the processor can also be provided with Custom Pipe Functions and/or Custom Declared Iteration Processors when you create an instance of it, when run it will use them if the template requires such customization.
 
 #### What is that _atmpl_ format? - atmpl syntax
-The atmpl format is Artifacter template syntax, for simplicity sake let's say we have a xml file that we want prerendered with specific data, being part of a build-time file or a deliverable artifact, we should use this file as a basis for our template. This template, onwards the "atmpl" file, can have any text within it, the engine will only look for certain declarations and expressions to fill them with additional data in its processing, using a generic object provided to the processor.
+The atmpl format is QSDT template syntax, for simplicity sake let's say we have a xml file that we want prerendered with specific data, being part of a build-time file or a deliverable artifact, we should use this file as a basis for our template. This template, onwards the "atmpl" file, can have any text within it, the engine will only look for certain declarations and expressions to fill them with additional data in its processing, using a generic object provided to the processor.
 
 ##### Mapped Expression
 This expression defines how a value contained in a generic object under certain key will replace its content, a Mapped Expression is broken down as follows:
 
-![alt mapped-expression-syntax-img](https://raw.githubusercontent.com/arthmoeros/artifacter-template-engine/master/docs/mapped_expression_syntax.gif)
+![alt mapped-expression-syntax-img](https://raw.githubusercontent.com/arthmoeros/qsdt-template-engine/master/docs/mapped_expression_syntax.gif)
 
 Now, about these parts:
 
@@ -199,6 +199,6 @@ If you have any suggestion for new features, I will gladly hear you out along wi
 
 ### Could I get some help with atmpl syntax? - Visual Studio Code Extension
 
-The extension is available at the Visual Studio Code Marketplace as "Artifacter Template", here is a link -> [Click Here](https://marketplace.visualstudio.com/items?itemName=arthmoeros.artifacter-template)
+The extension is available at the Visual Studio Code Marketplace as "QSDT Template", here is a link -> [Click Here](https://marketplace.visualstudio.com/items?itemName=arthmoeros.qsdt-template)
 
 However, it lacks some features from the v1.5 and v2.0 releases

@@ -1,4 +1,4 @@
-import { Annotation } from "@artifacter/common";
+import { Annotation } from "@qsdt/common";
 
 import { Osb11gGuid } from "./core/osb-11g-guid";
 import { NumberCounter } from "./core/number-counter";
@@ -6,7 +6,7 @@ import { DeclaredIterationProcessor } from "./core/declared-iteration-processor"
 
 /**
  * @class DeclaredIterationProcessorsMap
- * @see npm @artifacter/template-engine
+ * @see npm @qsdt/template-engine
  * @see also README.md of this project for an explanation about atmpl files and declared iteration processors
  * @author arthmoeros (Arturo Saavedra) artu.saavedra@gmail.com
  * 

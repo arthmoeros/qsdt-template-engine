@@ -1,10 +1,10 @@
 /**
  * @class DeclaredIteration
- * @see npm @artifacter/template-engine
+ * @see npm @qsdt/template-engine
  * @see also README.md of this project for an explanation about atmpl files
  * @author arthmoeros (Arturo Saavedra) artu.saavedra@gmail.com
  * 
- * This Class defines a declared iteration, which are recognized within Artifacter's template
+ * This Class defines a declared iteration, which are recognized within QSDT's template
  * engine, it is required for iterated mapped expressions to work, it defines the mappedKey to be used
  * on the iterated mapped expressions and the @TemplateFunction associated with it to retrieve the values to
  * replace the expressions with.

@@ -1,8 +1,8 @@
-import { StringHandlerUtil, StringContainer } from "@artifacter/common";
+import { StringHandlerUtil, StringContainer } from "@qsdt/common";
 
 /**
  * @class CorePipeFunctions
- * @see npm @artifacter/template-engine
+ * @see npm @qsdt/template-engine
  * @see also README.md of this project for an explanation about atmpl files
  * @author arthmoeros (Arturo Saavedra) artu.saavedra@gmail.com
  * 

@@ -1,12 +1,12 @@
-import { StringHandlerUtil } from "@artifacter/common";
+import { StringHandlerUtil } from "@qsdt/common";
 
 /**
  * @class MappedExpression
- * @see npm @artifacter/template-engine
+ * @see npm @qsdt/template-engine
  * @see also README.md of this project for an explanation about atmpl files
  * @author arthmoeros (Arturo Saavedra) artu.saavedra@gmail.com
  * 
- * This Class defines a mapped expression, which are recognized within Artifacter's template
+ * This Class defines a mapped expression, which are recognized within QSDT's template
  * engine, it defines the regex for location of normal, parameterized and iterated mapped 
  * expressions and provides a structured interface for the values and configuration that a 
  * mapped expression represents

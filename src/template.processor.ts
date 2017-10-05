@@ -1,4 +1,4 @@
-import { StringContainer, StringHandlerUtil, ObjectPropertyLocator } from "@artifacter/common";
+import { StringContainer, StringHandlerUtil, ObjectPropertyLocator } from "@qsdt/common";
 
 import { SubTemplate } from "./entity/sub-template";
 import { TemplateScanner, ElementMatch } from "./core/template-scanner";
@@ -12,7 +12,7 @@ import { CustomPipeFunctions } from "./core/custom-pipe-functions";
 const subTmplReged = new RegExp(/(::)*([a-zA-Z0-9_./]*?)*(::)/g);
 /**
  * @class TemplateProcessor
- * @see npm @artifacter/template-engine
+ * @see npm @qsdt/template-engine
  * @see also README.md of this project for an explanation about atmpl files
  * @author arthmoeros (Arturo Saavedra) artu.saavedra@gmail.com
  * 

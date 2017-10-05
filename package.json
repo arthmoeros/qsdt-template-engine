@@ -1,7 +1,7 @@
 {
-  "name": "@devial/template-engine",
+  "name": "@qsdt/template-engine",
   "version": "2.0.7",
-  "description": "Devial's template processing engine",
+  "description": "QSDT's template processing engine",
   "main": "index.js",
   "scripts": {
     "prepublish": "tsc",
@@ -10,24 +10,23 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/arthmoeros/artifacter-template-engine.git"
+    "url": "git+https://github.com/arthmoeros/qsdt-template-engine.git"
   },
   "keywords": [
     "artifact builder",
-    "artifacter",
+    "qsdt",
     "template",
     "engine",
-    "processing",
-    "devial"
+    "processing"
   ],
   "author": "arthmoeros",
   "license": "GPL-3.0",
   "bugs": {
-    "url": "https://github.com/arthmoeros/artifacter-template-engine/issues"
+    "url": "https://github.com/arthmoeros/qsdt-template-engine/issues"
   },
-  "homepage": "https://github.com/arthmoeros/artifacter-template-engine#readme",
+  "homepage": "https://github.com/arthmoeros/qsdt-template-engine#readme",
   "dependencies": {
-    "@artifacter/common": "^1.0.1",
+    "@qsdt/common": "^1.0.1",
     "hashcode": "^1.0.3",
     "ip": "^1.1.5"
   },
