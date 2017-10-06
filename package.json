@@ -1,6 +1,6 @@
 {
   "name": "@qsdt/template-engine",
-  "version": "2.0.7",
+  "version": "2.0.8",
   "description": "QSDT's template processing engine",
   "main": "index.js",
   "scripts": {

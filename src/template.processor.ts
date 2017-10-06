@@ -425,7 +425,7 @@ export class TemplateProcessor {
 	 */
 	private processPresentBlock(regexec: RegExpExecArray, matches: ElementMatch[], workingResult: StringContainer, input: {}, parentInput?: {}) {
 		let expr: string = regexec[2];
-		if (!SubTemplate.validSyntaxPresent.test(expr)) {
+		if (!new RegExp(SubTemplate.validSyntaxPresent).test(expr)) {
 			throw new Error(`Present block has invalid syntax, found: ${regexec[0]}`);
 		}
 		let startIndex: number = regexec.index;
