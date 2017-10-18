@@ -398,6 +398,7 @@ export class TemplateProcessor {
 				let offset: number = workingResult.$offset;
 				workingResult.replaceRange(startIndex + offset, endIndex + offset, '');
 				workingResult.$offset += 0 - (endIndex - startIndex);
+				return;
 			} else {
 				throw new Error(`Array named ${listName} wasn't found on input, neither in parentInput (if any)`);
 			}
