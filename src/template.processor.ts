@@ -277,9 +277,9 @@ export class TemplateProcessor {
 	 * @return Generated artifact
 	 */
 	public run(input: {}, parentInput?: {}): string {
-		if(input instanceof Map){
+		if (input instanceof Map) {
 			let convertedInput: {} = {};
-			input.forEach((value, key) =>{
+			input.forEach((value, key) => {
 				convertedInput[key] = value;
 			});
 			input = convertedInput;
@@ -370,9 +370,6 @@ export class TemplateProcessor {
 		if (parentInput != null && list == null) {
 			list = ObjectPropertyLocator.lookup(parentInput, listName);
 		}
-		if (list == null) {
-			throw new Error(`Array named ${listName} wasn't found on input, neither in parentInput (if any)`);
-		}
 
 		let startIndex: number = regexec.index + regexec[0].length;
 		let endIndex: number = null;
@@ -395,6 +392,17 @@ export class TemplateProcessor {
 				}
 			}
 		}
+
+		if (list == null) {
+			if (this.optionalityByDefault) {
+				let offset: number = workingResult.$offset;
+				workingResult.replaceRange(startIndex + offset, endIndex + offset, '');
+				workingResult.$offset += 0 - (endIndex - startIndex);
+			} else {
+				throw new Error(`Array named ${listName} wasn't found on input, neither in parentInput (if any)`);
+			}
+		}
+
 		let subTemplate: string = workingResult.toString().substring(startIndex + workingResult.$offset, endIndex + workingResult.$offset);
 		let replacementString: StringContainer = new StringContainer();
 		list.forEach((item) => {
