@@ -1,4 +1,5 @@
 #iteration(iterKey=numberCounter)
+#iteration(iterKeyGuid=generateOsb12cGUID)
 <root>
     <head>
         <key name="&{key.name}" value="&{key.value}" />
@@ -22,4 +23,9 @@
         </conditioned>
         ::/present::
     </body>
+    <iterated &{#iterKeyGuid} />
+    <iterated &{#iterKeyGuid} />
+    <iterated &{#iterKeyGuid} />
+    <iterated &{#iterKeyGuid} />
+    <iterated &{#iterKeyGuid} />
 </root>

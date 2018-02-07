@@ -6,7 +6,7 @@
   "scripts": {
     "prepublish": "tsc",
     "pretest": "tsc",
-    "test": "ts-node --no-ignore -P .\\src .\\src\\run-test.ts"
+    "test": "node ./test/new-test.js"
   },
   "repository": {
     "type": "git",
@@ -31,6 +31,7 @@
     "ip": "^1.1.5"
   },
   "devDependencies": {
+    "@types/ip": "0.0.30",
     "@types/node": "^7.0.14"
   }
 }

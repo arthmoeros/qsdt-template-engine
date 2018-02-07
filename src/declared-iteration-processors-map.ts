@@ -1,6 +1,7 @@
 import { Annotation } from "@qsdt/common";
 
 import { Osb11gGuid } from "./core/osb-11g-guid";
+import { Osb12cGuid } from "./core/osb-12c-guid";
 import { NumberCounter } from "./core/number-counter";
 import { DeclaredIterationProcessor } from "./core/declared-iteration-processor";
 
@@ -27,6 +28,9 @@ export class DeclaredIterationProcessorsMap {
 		this.coreProcessors = {};
 		let coreOsb11gGuid: DeclaredIterationProcessor = new Osb11gGuid()
 		this.coreProcessors[coreOsb11gGuid.identifier()] = coreOsb11gGuid;
+
+		let coreOsb12cGuid: DeclaredIterationProcessor = new Osb12cGuid()
+		this.coreProcessors[coreOsb12cGuid.identifier()] = coreOsb12cGuid;
 		
 		let numberCounter: DeclaredIterationProcessor = new NumberCounter()
 		this.coreProcessors[numberCounter.identifier()] = numberCounter;
