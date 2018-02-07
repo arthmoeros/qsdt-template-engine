@@ -1,10 +1,10 @@
 {
   "name": "@qsdt/template-engine",
-  "version": "2.0.10",
+  "version": "2.0.11",
   "description": "QSDT's template processing engine",
   "main": "index.js",
   "scripts": {
-    "prepublish": "tsc",
+    "prepublishOnly": "tsc",
     "pretest": "tsc",
     "test": "node ./test/new-test.js"
   },
